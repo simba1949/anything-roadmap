@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  anything-roadmap · index.html 模板（领地地图版）
+  anything-roadmap · index.html 模板（领地地图 HUD 版）
   ============================================================
   使用方法（生成时只做一件事）：
   1. 复制本文件到 <领域>-roadmap-<日期>/index.html
@@ -15,11 +15,11 @@
 <title>领域地图 · Field Atlas</title>
 <style>
   :root{
-    --bg:#0f1216; --panel:#151a1f; --panel2:#1a2026;
-    --line:rgba(224,216,196,.14); --line2:rgba(224,216,196,.34);
-    --ink:#e8e4d8; --dim:#a8a294; --faint:#5c6157;
-    --brass:#c9a36a;                        /* 铜金：领地/结构高亮专用 */
-    --c-doc:#6ea8d8; --c-blog:#d8b46a;      /* 媒介=制图墨色 */
+    --bg:#0e1217; --panel:#141a20; --panel2:#1a222a;
+    --line:rgba(222,214,194,.13); --line2:rgba(222,214,194,.32);
+    --ink:#e9e5d9; --dim:#a9a396; --faint:#5d635d;
+    --brass:#c9a36a;
+    --c-doc:#6ea8d8; --c-blog:#d8b46a;
     --c-video:#d87a6a; --c-site:#8ab09a;
     --mono:ui-monospace,"Cascadia Mono",Consolas,"Courier New",monospace;
     --serif:Georgia,"Iowan Old Style","Times New Roman",serif;
@@ -30,55 +30,79 @@
   body{
     margin:0; color:var(--ink); font:15px/1.75 var(--sans);
     background:var(--bg);
-    background-image:radial-gradient(rgba(201,163,106,.045) 1px,transparent 1.5px);
+    background-image:radial-gradient(rgba(201,163,106,.05) 1px,transparent 1.5px);
     background-size:28px 28px;
+  }
+  /* 氛围层：固定扫描线 + 暗角（只动 opacity，pointer-events 关闭） */
+  body::before{
+    content:""; position:fixed; inset:0; z-index:60; pointer-events:none;
+    background:repeating-linear-gradient(0deg, rgba(255,255,255,.014) 0 1px, transparent 1px 3px);
+    mix-blend-mode:overlay;
+  }
+  body::after{
+    content:""; position:fixed; inset:0; z-index:61; pointer-events:none;
+    background:radial-gradient(120% 90% at 50% 0%, transparent 55%, rgba(0,0,0,.5));
   }
   a{color:var(--c-doc); text-decoration:none}
   a:hover{text-decoration:underline}
   :focus-visible{outline:2px solid var(--brass); outline-offset:2px; border-radius:2px}
-  ::selection{background:rgba(201,163,106,.28)}
+  ::selection{background:rgba(201,163,106,.3)}
   .wrap{max-width:1200px; margin:0 auto; padding:0 24px}
 
-  /* ---------- 页眉：勘察记录头 ---------- */
-  header.page{padding:56px 0 26px; border-bottom:1px solid var(--line)}
+  /* ---------- 页眉 ---------- */
+  header.page{padding:54px 0 26px; border-bottom:1px solid var(--line)}
   .eyebrow{font:600 11px/1 var(--mono); letter-spacing:.34em; color:var(--brass); text-transform:uppercase}
-  h1.domain{margin:16px 0 10px; font:600 clamp(28px,5vw,44px)/1.15 var(--serif); letter-spacing:.01em; font-weight:600}
+  h1.domain{margin:16px 0 10px; font:600 clamp(28px,5vw,44px)/1.15 var(--serif); letter-spacing:.01em}
   h1.domain .zh{color:var(--ink)}
   .readout{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px}
   .chip{font:500 11px/1.4 var(--mono); color:var(--dim); border:1px solid var(--line2);
         border-radius:3px; padding:6px 10px; background:rgba(201,163,106,.05)}
   .chip b{color:var(--brass); font-weight:600}
 
-  /* ---------- 粘性工具栏：图层与导航 ---------- */
-  .toolbar{position:sticky; top:0; z-index:20; backdrop-filter:blur(10px);
-           background:rgba(15,18,22,.86); border-bottom:1px solid var(--line)}
+  /* ---------- 粘性工具栏 ---------- */
+  .toolbar{position:sticky; top:0; z-index:50; backdrop-filter:blur(10px);
+           background:rgba(14,18,23,.86); border-bottom:1px solid var(--line);
+           transition:box-shadow .25s, background .25s}
+  .toolbar.is-scrolled{box-shadow:0 8px 24px -12px rgba(0,0,0,.55)}
   .toolbar .row{display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:10px 0; overflow-x:auto}
   .lylabel{font:600 10px/1 var(--mono); letter-spacing:.22em; color:var(--faint); text-transform:uppercase; margin-right:2px}
   .fbtn{font:600 11px/1 var(--mono); letter-spacing:.06em; color:var(--dim); background:none;
         border:1px solid var(--line2); border-radius:3px; padding:7px 11px; cursor:pointer;
-        display:inline-flex; align-items:center; gap:7px; white-space:nowrap}
+        display:inline-flex; align-items:center; gap:7px; white-space:nowrap;
+        transition:color .15s,border-color .15s,transform .1s}
   .fbtn .dot{width:8px; height:8px; border-radius:50%; background:var(--mc)}
   .fbtn[aria-pressed="true"]{color:var(--ink); border-color:var(--mc); background:rgba(201,163,106,.08)}
   .fbtn.plain .dot{background:var(--faint)}
   .fbtn:hover{border-color:var(--brass)}
+  .fbtn:active{transform:scale(.97)}
   .sep{width:1px; height:20px; background:var(--line2); margin:0 4px; flex:none}
-  .mjump{font:500 11px/1 var(--mono); color:var(--dim); white-space:nowrap; padding:7px 4px}
+  .mjump{font:500 11px/1 var(--mono); color:var(--dim); white-space:nowrap; padding:7px 4px; border-bottom:2px solid transparent}
   .mjump:hover{color:var(--brass); text-decoration:none}
+  .mjump.active{color:var(--brass); border-bottom-color:var(--brass)}
+  .crumb{font:600 11px/1 var(--mono); color:var(--faint); letter-spacing:.08em; margin-left:auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:46%}
+  .crumb b{color:var(--brass); font-weight:600}
 
   /* ---------- 分节 ---------- */
-  section{padding:50px 0 10px}
+  section{padding:52px 0 10px}
   .sec-eyebrow{font:600 11px/1 var(--mono); letter-spacing:.34em; color:var(--brass); text-transform:uppercase; margin-bottom:8px}
-  h2.sec{margin:0 0 24px; font:600 23px/1.2 var(--serif); letter-spacing:.01em}
+  h2.sec{margin:0 0 24px; font:650 23px/1.2 var(--sans); letter-spacing:.005em}
   h2.sec .en{font:600 10px/1 var(--mono); color:var(--faint); letter-spacing:.2em; margin-left:14px; vertical-align:middle; text-transform:uppercase}
 
   .panel{background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:18px 20px}
   .twocol{display:grid; grid-template-columns:1fr 1fr; gap:14px}
   .panel h3{margin:0 0 8px; font:600 11px/1 var(--mono); letter-spacing:.2em; color:var(--brass); text-transform:uppercase}
 
-  /* ---------- 领地地图（签名元素） ---------- */
-  .chartbox{background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:8px; margin-top:16px}
-  svg#chart{width:100%; height:auto; display:block}
-  #chart .grat{fill:none; stroke:rgba(224,216,196,.07); stroke-width:1}
+  /* ---------- 领地地图（HUD） ---------- */
+  .chartbox{position:relative; background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:8px; margin-top:16px; overflow:hidden}
+  svg#chart{width:100%; height:auto; display:block; position:relative; z-index:1}
+  /* HUD 十字准星 */
+  .hud{position:absolute; inset:0; z-index:2; pointer-events:none; opacity:0; transition:opacity .2s}
+  .chartbox:hover .hud{opacity:1}
+  .hud .v{position:absolute; top:0; bottom:0; width:1px; background:rgba(201,163,106,.28); transform:translateX(var(--mx))}
+  .hud .h{position:absolute; left:0; right:0; height:1px; background:rgba(201,163,106,.28); transform:translateY(var(--my))}
+  .hud .rd{position:absolute; left:10px; bottom:10px; font:600 10px/1.6 var(--mono); color:var(--brass);
+           letter-spacing:.1em; background:rgba(14,18,23,.8); border:1px solid var(--line2); padding:4px 8px; border-radius:3px}
+  #chart .grat{fill:none; stroke:rgba(222,214,194,.07); stroke-width:1}
   #chart .route{fill:none; stroke:var(--line2); stroke-width:1.4; stroke-dasharray:3 6; transition:opacity .18s,stroke .18s}
   #chart.dim .route{opacity:.08}
   #chart .route.hot{opacity:1; stroke:var(--brass); stroke-width:2; stroke-dasharray:none}
@@ -87,7 +111,7 @@
   #chart .land{cursor:pointer}
   #chart .landfill{fill:rgba(201,163,106,.05); stroke:var(--line2); stroke-width:1.1; transition:fill .18s,stroke .18s}
   #chart .land .hatch{fill:none; stroke:rgba(201,163,106,.08); stroke-width:1}
-  #chart .land:hover .landfill,#chart .land:focus .landfill{fill:rgba(201,163,106,.12); stroke:var(--brass); stroke-width:1.6}
+  #chart .land:hover .landfill,#chart .land:focus .landfill{fill:rgba(201,163,106,.13); stroke:var(--brass); stroke-width:1.7}
   #chart.dim .land{opacity:.28; transition:opacity .18s}
   #chart.dim .land.hot{opacity:1}
   #chart .lnum{fill:var(--brass); font:700 15px var(--mono); text-anchor:middle; pointer-events:none}
@@ -107,7 +131,7 @@
   .relations .pair{font:600 12px/1 var(--mono); color:var(--brass); white-space:nowrap}
   .relations .note{color:var(--dim)}
 
-  /* ---------- 大纲：四级折叠，领土卡片树 ---------- */
+  /* ---------- 大纲：四级折叠 + 层次引导线 ---------- */
   details{border:1px solid var(--line); border-radius:4px; background:var(--panel); margin:12px 0}
   details.mod{border-left:3px solid var(--brass)}
   summary{cursor:pointer; list-style:none; display:flex; align-items:baseline; gap:12px; padding:14px 18px; user-select:none}
@@ -115,7 +139,7 @@
   summary .tw{font:600 11px var(--mono); color:var(--faint); transition:transform .18s; display:inline-block; transform:translateY(-1px)}
   details[open]>summary .tw{transform:rotate(90deg) translateY(-1px)}
   .mno{font:700 13px var(--mono); color:var(--brass); letter-spacing:.06em}
-  .mname{font:600 17px/1.3 var(--serif)}
+  .mname{font:600 17px/1.3 var(--sans)}
   .mwhy{color:var(--dim); font-size:13px; flex:1; min-width:120px}
   .mcount,.tcount{font:500 11px/1 var(--mono); color:var(--faint); white-space:nowrap}
   .refs{display:inline-flex; gap:5px}
@@ -125,17 +149,24 @@
   details.topic{border-left:2px solid var(--line2)}
   .tname{font-weight:600; font-size:15px}
   .cname{font-weight:550; font-size:14px}
-  .body{padding:2px 18px 12px 34px}
+  .body{padding:2px 18px 12px 34px; position:relative}
+  .body::before{content:""; position:absolute; left:18px; top:0; bottom:0; width:1px;
+                background:linear-gradient(var(--line2),transparent 85%)}
 
   ul.kps{list-style:none; margin:6px 0; padding:0}
   li.kp{display:grid; grid-template-columns:minmax(200px,1fr) 2fr; gap:10px 18px;
-        padding:9px 2px; border-bottom:1px dashed var(--line)}
+        padding:9px 2px; border-bottom:1px dashed var(--line); position:relative}
   li.kp:last-child{border-bottom:none}
+  li.kp::before{content:""; position:absolute; left:-16px; top:0; bottom:0; width:1px; background:var(--line)}
   .kpname{font-size:14px; font-weight:550}
   .kpname::before{content:"▸ "; color:var(--faint); font-size:10px; vertical-align:2px}
   .srcs{display:flex; flex-wrap:wrap; gap:6px}
   .src{display:inline-flex; align-items:center; gap:7px; border:1px solid var(--line);
-       border-left:3px solid var(--mc); border-radius:3px; padding:4px 9px; font-size:12.5px; background:rgba(201,163,106,.03)}
+       border-left:3px solid var(--mc); border-radius:3px; padding:4px 9px; font-size:12.5px;
+       background:rgba(201,163,106,.03); cursor:copy; transition:border-color .15s,background .15s,transform .1s}
+  .src:hover{border-color:var(--mc); background:rgba(201,163,106,.08)}
+  .src:active{transform:scale(.97)}
+  .src.copied{outline:1px solid var(--brass)}
   .src .code{font:700 9px/1 var(--mono); letter-spacing:.12em; color:var(--mc)}
   .src .lang{font:600 9px/1 var(--mono); color:var(--faint); border:1px solid var(--line); border-radius:2px; padding:2px 3px}
   .src a{color:var(--ink)} .src a:hover{color:var(--mc)}
@@ -162,20 +193,48 @@
   .colophon b{color:var(--brass); font-family:var(--mono); font-weight:600}
   footer.page{margin-top:54px; padding:22px 0 48px; border-top:1px solid var(--line)}
 
+  /* ---------- 回到顶部 ---------- */
+  #totop{position:fixed; right:22px; bottom:22px; z-index:55; opacity:0; pointer-events:none;
+         transform:translateY(6px); transition:opacity .25s,transform .25s;
+         width:40px; height:40px; border-radius:4px; border:1px solid var(--line2);
+         background:var(--panel); color:var(--brass); font:700 14px var(--mono); cursor:pointer}
+  #totop.show{opacity:1; pointer-events:auto; transform:none}
+  #totop:hover{border-color:var(--brass)}
+  #totop:active{transform:scale(.95)}
+
+  /* ---------- 轻提示 ---------- */
+  #toast{position:fixed; left:50%; bottom:26px; transform:translate(-50%,16px); z-index:62;
+         opacity:0; pointer-events:none; transition:opacity .2s,transform .2s;
+         font:600 11px/1 var(--mono); color:var(--ink); background:var(--panel2);
+         border:1px solid var(--brass); border-radius:3px; padding:8px 14px; letter-spacing:.06em}
+  #toast.show{opacity:1; transform:translate(-50%,0)}
+
   .empty{border:1px dashed var(--line2); border-radius:4px; padding:30px; text-align:center; color:var(--dim); font-family:var(--mono); font-size:13px}
 
   @media (max-width:760px){
     .twocol{grid-template-columns:1fr}
     li.kp{grid-template-columns:1fr}
     .mwhy{display:none}
+    .crumb{display:none}
     summary{flex-wrap:wrap; gap:8px}
   }
   @media (prefers-reduced-motion:no-preference){
-    .reveal{animation:rise .5s ease both}
-    @keyframes rise{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+    .reveal{opacity:0; transform:translateY(10px); transition:opacity .5s,transform .5s}
+    .reveal.in{opacity:1; transform:none}
+    .stagger>*{opacity:0; transform:translateY(8px); transition:opacity .5s,transform .5s}
+    .stagger.in>*{opacity:1; transform:none}
+    .stagger.in>*:nth-child(2){transition-delay:.05s}
+    .stagger.in>*:nth-child(3){transition-delay:.1s}
+    .stagger.in>*:nth-child(4){transition-delay:.15s}
+    .stagger.in>*:nth-child(5){transition-delay:.2s}
+    .stagger.in>*:nth-child(n+6){transition-delay:.25s}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .reveal,.stagger>*{opacity:1; transform:none; transition:none}
   }
   @media print{
     body{background:#fff; color:#1c1a16; background-image:none}
+    body::before,body::after,#totop,#toast{display:none}
     .toolbar{display:none}
     header.page,footer.page{border-color:#ddd}
     .panel,.chartbox,details{background:#fff; border-color:#d8d2c4}
@@ -185,7 +244,7 @@
     #chart .land .hatch{stroke:#e0d8c6}
     #chart .lnum,#chart .compass .N{fill:#8a6d1f}
     #chart .lname{fill:#333}
-    .eyebrow,h1.domain .zh,.chip b,.mno,.relations .pair,.ex h4{color:#8a6d1f}
+    .eyebrow,.chip b,.mno,.relations .pair,.ex h4{color:#8a6d1f}
     .chip,.ref,.tier{border-color:#bbb; color:#444}
     a{color:#1a56b8}
     .src{background:#fff; border-color:#d8d2c4} .src a{color:#1a56b8}
@@ -195,13 +254,13 @@
 </head>
 <body>
 
-<header class="page"><div class="wrap">
+<header class="page" id="top"><div class="wrap">
   <div class="eyebrow">Field Atlas · 领域地图</div>
   <h1 class="domain"><span class="zh" id="h-domain"></span> 学习路线</h1>
   <div class="readout" id="h-chips"></div>
 </div></header>
 
-<div class="toolbar"><div class="wrap"><div class="row" id="toolbar"></div></div></div>
+<div class="toolbar" id="toolbar-bar"><div class="wrap"><div class="row" id="toolbar"></div></div></div>
 
 <main class="wrap">
 
@@ -212,7 +271,10 @@
       <div class="panel"><h3>领域全貌</h3><p id="ov-landscape"></p></div>
       <div class="panel"><h3>领地拆分依据</h3><p id="ov-cohesion"></p></div>
     </div>
-    <div class="chartbox"><svg id="chart" viewBox="0 0 1000 620" role="img" aria-label="模块领地关系地图"></svg></div>
+    <div class="chartbox" id="chartbox">
+      <svg id="chart" viewBox="0 0 1000 620" role="img" aria-label="模块领地关系地图"></svg>
+      <div class="hud"><span class="v"></span><span class="h"></span><span class="rd" id="hud-rd"></span></div>
+    </div>
     <div class="legend" id="legend"></div>
     <ul class="relations" id="relations"></ul>
   </section>
@@ -237,6 +299,9 @@
 
 </main>
 
+<button id="totop" aria-label="回到顶部" title="回到顶部">↑</button>
+<div id="toast" role="status"></div>
+
 <script>
 /* DATA-START */
 /* ↓↓↓ 只替换这一个对象。type: doc|blog|video|site；lang: 中|EN；
@@ -244,7 +309,7 @@
 const DATA = {
   domain: "分布式系统（示例数据）",
   date: "2026-08-21",
-  mode: "prior",                    /* prior=前人路线为骨 | docs=官方文档回退 */
+  mode: "prior",
   level: "零基础",
   stats: { found: 52, passed: 47, dropped: 5 },
   overview: {
@@ -314,6 +379,14 @@ const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g,
 const trunc = (s, n) => (String(s).length > n ? String(s).slice(0, n) + "…" : String(s));
 const countKPs = m => m.topics.reduce((a, t) => a + t.chapters.reduce(
   (b, c) => b + c.points.length, 0), 0);
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 1600);
+}
 
 function render() {
   document.title = "领域地图 · " + DATA.domain;
@@ -329,7 +402,7 @@ function render() {
   $("#ov-landscape").textContent = DATA.overview.landscape;
   $("#ov-cohesion").textContent = DATA.overview.cohesion;
 
-  /* 工具栏：图层切换 */
+  /* 工具栏：图层 + 面包屑 */
   const tb = $("#toolbar");
   tb.innerHTML = `<span class="lylabel">图层</span>` +
     Object.entries(MEDIA).map(([k, m]) =>
@@ -340,7 +413,8 @@ function render() {
     `<button class="fbtn plain" id="btn-col">收起全部</button>` +
     `<span class="sep"></span>` +
     DATA.modules.map((m, i) =>
-      `<a class="mjump" href="#mod-${i + 1}">M${i + 1} ${esc(trunc(m.name, 8))}</a>`).join("");
+      `<a class="mjump" href="#mod-${i + 1}">M${i + 1}</a>`).join("") +
+    `<span class="crumb" id="crumb"></span>`;
   tb.querySelectorAll(".fbtn[data-t]").forEach(b => b.addEventListener("click", () => {
     const on = b.getAttribute("aria-pressed") === "true";
     b.setAttribute("aria-pressed", String(!on));
@@ -355,9 +429,8 @@ function render() {
       `<span class="lg" style="--mc:${m.color}"><span class="sw"></span>${m.code} ${m.zh}</span>`).join("") +
     `<span class="lg" style="--mc:var(--brass)"><span class="sw"></span>领地 = 模块</span>` +
     `<span class="lg" style="--mc:var(--brass)"><span class="sw"></span>虚线 = 模块路线</span>` +
-    `<span class="lnote">悬停领地高亮关联路线 · 点击下钻</span>`;
+    `<span class="lnote">悬停高亮 · 点击下钻 · 点来源复制链接</span>`;
 
-  /* 路线说明 */
   $("#relations").innerHTML = (DATA.relations || []).map(r =>
     `<li><span class="pair">M${r.from} ⇄ M${r.to}</span><span class="note">${esc(r.note)}</span></li>`).join("");
 
@@ -373,7 +446,7 @@ function render() {
         const pts = c.points.map(p => {
           const ss = p.sources.map(s => {
             const md = MEDIA[s.type] || MEDIA.site;
-            return `<span class="src" data-t="${esc(s.type)}" style="--mc:${md.color}" title="${esc(s.note || "")}">` +
+            return `<span class="src" data-t="${esc(s.type)}" style="--mc:${md.color}" title="点击复制：${esc(s.url)}" data-url="${esc(s.url)}">` +
               `<span class="code">${md.code}</span><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>` +
               `<span class="lang">${esc(s.lang)}</span></span>`;
           }).join("");
@@ -395,7 +468,7 @@ function render() {
 
   /* 参考图源 */
   $("#paths").innerHTML = DATA.priorPaths.map((p, i) =>
-    `<li id="prior-${i}"><span class="tier">${esc(p.tier)}</span>` +
+    `<li id="prior-${i}" class="stagger"><span class="tier">${esc(p.tier)}</span>` +
     `<div><div class="pt"><a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title)}</a></div>` +
     `<div class="pc">${esc(p.comment)}</div></div></li>`).join("");
 
@@ -411,21 +484,22 @@ function render() {
     ` 本页为一次性快照、零外部依赖，可离线打开；来源老化时请整份重新生成，对成品的纠正意见也以全新重跑处理。`;
 
   buildMap();
+  wireHUD();
+  wireScrollspy();
+  wireSources();
+  wireTop();
 }
 
-/* ---------- 领地地图（签名元素） ---------- */
+/* ---------- 领地地图 ---------- */
 function buildMap() {
   const svg = $("#chart"), W = 1000, H = 620, CX = 500, CY = 330, R = 250;
   const n = DATA.modules.length;
   const rad = i => Math.min(46, 14 + Math.sqrt(countKPs(DATA.modules[i])) * 3.4);
-
-  /* 领地中心：螺旋排布（确定性） */
   const pos = DATA.modules.map((_, i) => {
     const a = i * 2.39996 - Math.PI / 2, r = R * Math.sqrt((i + 0.7) / n);
     return { x: CX + r * Math.cos(a), y: CY + r * Math.sin(a) };
   });
 
-  /* 地物轮廓：径向波浪闭合路径（确定性，无随机） */
   function landPath(i, p, rr) {
     const K = 11;
     const pts = [];
@@ -443,22 +517,16 @@ function buildMap() {
     return d + " Z";
   }
   function hatch(i, p, rr) {
-    let d = "";
-    const L = 16, gap = 9;
+    let d = ""; const L = 16, gap = 9;
     const x0 = Math.floor((p.x - rr) / gap) * gap, x1 = p.x + rr;
-    for (let x = x0; x <= x1; x += gap) {
-      const x1p = x + L;
-      d += `M${x},${p.y - rr} L${x1p},${p.y + rr} `;
-    }
+    for (let x = x0; x <= x1; x += gap) d += `M${x},${p.y - rr} L${x + L},${p.y + rr} `;
     return d;
   }
 
-  /* 经纬网格 */
   let g = "";
   for (let x = 100; x < W; x += 100) g += `<line x1="${x}" y1="20" x2="${x}" y2="${H - 20}" class="grat"/>`;
   for (let y = 60; y < H; y += 100) g += `<line x1="20" y1="${y}" x2="${W - 20}" y2="${y}" class="grat"/>`;
 
-  /* 罗盘（右上） */
   const cc = { x: W - 48, y: 52 };
   g += `<g class="compass">` +
        `<circle cx="${cc.x}" cy="${cc.y}" r="24"/>` +
@@ -466,7 +534,6 @@ function buildMap() {
        `<line x1="${cc.x - 24}" y1="${cc.y}" x2="${cc.x + 24}" y2="${cc.y}"/>` +
        `<text x="${cc.x}" y="${cc.y + 9}" class="N">N</text></g>`;
 
-  /* 路线（领地间虚线） */
   (DATA.relations || []).forEach(rel => {
     const a = pos[rel.from - 1], b = pos[rel.to - 1];
     if (!a || !b) return;
@@ -483,7 +550,6 @@ function buildMap() {
          `<circle cx="${s2.x.toFixed(1)}" cy="${s2.y.toFixed(1)}" r="3" class="waypoint"/>`;
   });
 
-  /* 领地 */
   DATA.modules.forEach((m, i) => {
     const p = pos[i], rr = rad(i), kp = countKPs(m);
     g += `<g class="land" data-m="${i + 1}" tabindex="0" role="link" aria-label="跳转到模块 M${i + 1} ${esc(m.name)}">` +
@@ -496,18 +562,20 @@ function buildMap() {
   });
   svg.innerHTML = g;
 
-  /* 悬停 / 键盘 / 点击 */
   svg.querySelectorAll(".land").forEach(ld => {
     const m = +ld.dataset.m;
     const on = () => {
       svg.classList.add("dim");
       svg.querySelectorAll(`.route[data-from="${m}"],.route[data-to="${m}"]`).forEach(l => l.classList.add("hot"));
       ld.classList.add("hot");
+      const t = DATA.modules[m - 1];
+      $("#hud-rd").textContent = `M${m} ${t.name} · ${countKPs(t)} KP`;
     };
     const off = () => {
       svg.classList.remove("dim");
       svg.querySelectorAll(".route.hot").forEach(l => l.classList.remove("hot"));
       ld.classList.remove("hot");
+      $("#hud-rd").textContent = "";
     };
     const go = () => { location.hash = "#mod-" + m; };
     ld.addEventListener("mouseenter", on);  ld.addEventListener("mouseleave", off);
@@ -515,6 +583,70 @@ function buildMap() {
     ld.addEventListener("click", go);
     ld.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
   });
+}
+
+/* ---------- HUD 十字准星（仅 transform，pointer 交互） ---------- */
+function wireHUD() {
+  const box = $("#chartbox");
+  if (!box || reduced) return;
+  box.addEventListener("mousemove", e => {
+    const r = box.getBoundingClientRect();
+    box.style.setProperty("--mx", (e.clientX - r.left) + "px");
+    box.style.setProperty("--my", (e.clientY - r.top) + "px");
+  });
+}
+
+/* ---------- 滚动探针：面包屑 + 工具栏高亮（IntersectionObserver，零 scroll 监听） ---------- */
+function wireScrollspy() {
+  const jumps = [...document.querySelectorAll(".mjump")];
+  const crumb = $("#crumb");
+  const bar = $("#toolbar-bar");
+  const setActive = idx => {
+    jumps.forEach((j, i) => j.classList.toggle("active", i === idx));
+    if (idx >= 0) {
+      const m = DATA.modules[idx];
+      crumb.innerHTML = `M${idx + 1} <b>${esc(m.name)}</b>`;
+    } else crumb.innerHTML = "";
+  };
+  const topSentinel = new IntersectionObserver(es => {
+    es.forEach(en => bar.classList.toggle("is-scrolled", !en.isIntersecting));
+  }, { threshold: 0 });
+  topSentinel.observe(document.getElementById("top"));
+  const modObs = new IntersectionObserver(es => {
+    es.forEach(en => { if (en.isIntersecting) setActive(+en.target.id.replace("mod-", "") - 1); });
+  }, { rootMargin: "-20% 0px -70% 0px" });
+  document.querySelectorAll("details.mod").forEach(d => modObs.observe(d));
+  const endSentinel = new IntersectionObserver(es => {
+    es.forEach(en => { if (en.isIntersecting) setActive(DATA.modules.length - 1); });
+  }, { threshold: .05 });
+  const foot = document.querySelector("footer.page"); if (foot) endSentinel.observe(foot);
+}
+
+/* ---------- 来源复制 ---------- */
+function wireSources() {
+  document.querySelectorAll(".src").forEach(s => {
+    s.addEventListener("click", e => {
+      if (e.target.closest("a")) return;
+      const url = s.dataset.url; if (!url) return;
+      const done = () => { s.classList.add("copied"); toast("已复制 " + url); setTimeout(() => s.classList.remove("copied"), 1200); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, done);
+      else { const i = document.createElement("input"); i.value = url; document.body.appendChild(i); i.select(); try { document.execCommand("copy"); } catch(_){} i.remove(); done(); }
+    });
+  });
+}
+
+/* ---------- 滚动渐入 + 回到顶部 ---------- */
+function wireTop() {
+  const btn = $("#totop");
+  btn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" }));
+  const hero = document.getElementById("top");
+  const io = new IntersectionObserver(es => es.forEach(en => btn.classList.toggle("show", !en.isIntersecting)), { threshold: 0 });
+  if (hero) io.observe(hero);
+  if (reduced) return;
+  const revealIO = new IntersectionObserver(es => {
+    es.forEach(en => { if (en.isIntersecting) { en.target.classList.add("in"); revealIO.unobserve(en.target); } });
+  }, { threshold: .12 });
+  document.querySelectorAll(".reveal, .stagger").forEach(el => revealIO.observe(el));
 }
 
 /* ---------- 自检与启动 ---------- */
