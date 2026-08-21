@@ -7,7 +7,7 @@ An agent skill that generates a systematic learning roadmap for any domain: it r
 ## Install
 
 ```bash
-npx skills add <your-github-username>/anything-roadmap
+npx skills add simba1949/anything-roadmap
 ```
 
 Or manually: copy `SKILL.md` and `references/` from the repo root into your agent's skills directory (e.g. `~/.claude/skills/anything-roadmap/` for Claude Code).
