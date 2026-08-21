@@ -29,10 +29,11 @@ description: 为任意领域生成系统化学习路线（模块→主题→章�
 | 前人路线 / 官方文档 / 博客 / 网站 / 社区讨论（间接） | Exa：`mcporter call exa.web_search_exa query="…" numResults=5` | WebSearch |
 | awesome-list / GitHub 仓库 | `gh search repos "…" --sort stars --limit 10` | WebSearch |
 | YouTube 视频 | `yt-dlp --dump-json "ytsearch5:…"` | WebSearch |
-| B站视频 | `bili search "…" --type video -n 5` | WebSearch |
+| B站视频 | `PYTHONUTF8=1 bili search "…" --type video -n 5`（防 Windows GBK 乱码） | WebSearch |
 | 打开验证链接 | Jina：`curl -s "https://r.jina.ai/<URL>"` → web_reader MCP → WebFetch | — |
 
 ### 2. 前人路线调研
+- 官方文档站若提供 `llms.txt`（机器可读全站索引），优先抓它当结构骨架——一次拿到全部页面清单与一句话描述，再挑相关页逐条验证。
 中英文都发查询：`<domain> roadmap`、`how to learn <domain>`、`<domain> syllabus site:.edu`、`awesome <domain>`、`how to learn <domain> site:reddit.com`、`<领域> 学习路线`、`<领域> 入门 知乎/掘金`（经 Exa 间接捞）。每条候选打开确认真实存在且内容对口，记录 tier/标题/URL/一句话点评 → priorPaths。数量不足 2 条 → 触发铁律 2 的降级模式。
 
 ### 3. 合成主题树
@@ -45,12 +46,14 @@ description: 为任意领域生成系统化学习路线（模块→主题→章�
 
 ### 5. 逐条验证
 - 每个候选 URL 按路由表最后一行三通道接力打开，三问全过才入选：活着？对题？权威？否则剔除并计数。
+- curl/直连失败 ≠ 死链：本机网络抖动常见，先换通道（本地代理 → web_reader → Jina）重试再判死。
 - 候选量大时可用并行子代理加速。全程记 found / passed / dropped。
 
 ### 6. 成稿
 输出目录 `./<领域>-roadmap-<YYYYMMDD>/`：
 - **syllabus.md**：按下方骨架写全内容，正文中文、来源标题保留原文。
 - **index.html**：复制本 skill 的 `references/template.html`，只替换 `/* DATA-START */` 到 `/* DATA-END */` 之间的 DATA 对象（schema 见模板内注释），其余不动。生成后自检：`grep -E 'src="http|link[^>]*href="http' index.html` 必须为空（零 CDN 禁令，data-START 内的来源链接除外——它们是 <a> 不带 src）。
+- **交付**：生成结束必须在对话中明确列出两个产物的完整绝对路径（如 `D:\…\<领域>-roadmap-<日期>\syllabus.md` 与同目录 `index.html`），并把两份文件发送给用户。
 - 若为纠正重跑：把用户纠正意见当作本次的硬约束，从第 0 步重新执行全部流程。
 
 **syllabus.md 骨架**：
