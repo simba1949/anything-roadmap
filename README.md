@@ -10,7 +10,7 @@
 npx skills add <你的GitHub用户名>/anything-roadmap
 ```
 
-或手动安装：把 `skills/anything-roadmap/` 整个文件夹复制到你的 agent 技能目录（如 Claude Code 的 `~/.claude/skills/`）。
+或手动安装：把仓库根目录的 `SKILL.md` 与 `references/` 复制到你的 agent 技能目录（如 Claude Code 的 `~/.claude/skills/anything-roadmap/`）。
 
 ## 它做什么
 

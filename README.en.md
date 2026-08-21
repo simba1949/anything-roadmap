@@ -10,7 +10,7 @@ An agent skill that generates a systematic learning roadmap for any domain: it r
 npx skills add <your-github-username>/anything-roadmap
 ```
 
-Or manually: copy the `skills/anything-roadmap/` folder into your agent's skills directory (e.g. `~/.claude/skills/` for Claude Code).
+Or manually: copy `SKILL.md` and `references/` from the repo root into your agent's skills directory (e.g. `~/.claude/skills/anything-roadmap/` for Claude Code).
 
 ## What it does
 
