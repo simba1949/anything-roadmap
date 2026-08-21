@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<!--
+  anything-roadmap · index.html 模板（知识星图版）
+  ============================================================
+  使用方法（生成时只做一件事）：
+  1. 复制本文件到 <领域>-roadmap-<日期>/index.html
+  2. 只替换 <script> 内 DATA-START 与 DATA-END 两个注释标记之间的 DATA 对象（勿改本行字样）
+  3. 其余 CSS/JS/结构一律不动（除非修 bug）
+  禁令：不得引入任何外部 script / stylesheet / 字体 / 图片（零 CDN，离线可开）。
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>知识星图 · Learning Roadmap</title>
+<style>
+  :root{
+    --bg:#070b14; --panel:#0b111f; --panel2:#0e1626;
+    --line:rgba(158,178,214,.14); --line2:rgba(158,178,214,.32);
+    --ink:#dfe8f7; --dim:#93a3bd; --faint:#5c6a84;
+    --star:#ffe9c4;                       /* 恒星金白：模块与结构高亮专用 */
+    --c-doc:#8ab8ff; --c-blog:#ffd27a;    /* 媒介色 ≈ 恒星光谱分类 */
+    --c-video:#ff8f7a; --c-site:#c9a2ff;
+    --mono:ui-monospace,"Cascadia Mono",Consolas,"Courier New",monospace;
+    --sans:system-ui,-apple-system,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; color:var(--ink); font:15px/1.75 var(--sans);
+    background:var(--bg);
+    background-image:radial-gradient(rgba(158,178,214,.05) 1px,transparent 1.5px);
+    background-size:26px 26px;
+  }
+  a{color:var(--c-doc); text-decoration:none}
+  a:hover{text-decoration:underline}
+  :focus-visible{outline:2px solid var(--c-doc); outline-offset:2px; border-radius:2px}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 22px}
+
+  /* ---------- 页眉：仪表读数 ---------- */
+  header.page{padding:52px 0 26px; border-bottom:1px solid var(--line)}
+  .eyebrow{font:600 11px/1 var(--mono); letter-spacing:.32em; color:var(--faint); text-transform:uppercase}
+  h1.domain{margin:14px 0 10px; font-size:clamp(26px,4.5vw,40px); line-height:1.25; letter-spacing:.01em}
+  h1.domain .zh{color:var(--star)}
+  .readout{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px}
+  .chip{font:500 11px/1 var(--mono); color:var(--dim); border:1px solid var(--line2);
+        border-radius:3px; padding:6px 9px; background:rgba(158,178,214,.04)}
+  .chip b{color:var(--star); font-weight:600}
+
+  /* ---------- 粘性工具栏 ---------- */
+  .toolbar{position:sticky; top:0; z-index:20; backdrop-filter:blur(10px);
+           background:rgba(7,11,20,.85); border-bottom:1px solid var(--line)}
+  .toolbar .row{display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:10px 0; overflow-x:auto}
+  .fbtn{font:600 11px/1 var(--mono); letter-spacing:.08em; color:var(--dim); background:none;
+        border:1px solid var(--line2); border-radius:3px; padding:7px 11px; cursor:pointer;
+        display:inline-flex; align-items:center; gap:7px; white-space:nowrap}
+  .fbtn .dot{width:7px; height:7px; border-radius:50%; background:var(--mc)}
+  .fbtn[aria-pressed="true"]{color:var(--ink); border-color:var(--mc); background:rgba(158,178,214,.07)}
+  .fbtn.plain .dot{background:var(--faint)}
+  .fbtn:hover{border-color:var(--star)}
+  .sep{width:1px; height:20px; background:var(--line2); margin:0 4px; flex:none}
+  .mjump{font:500 11px/1 var(--mono); color:var(--dim); white-space:nowrap; padding:7px 4px}
+  .mjump:hover{color:var(--star); text-decoration:none}
+
+  /* ---------- 分节 ---------- */
+  section{padding:46px 0 8px}
+  .sec-eyebrow{font:600 11px/1 var(--mono); letter-spacing:.32em; color:var(--faint); text-transform:uppercase; margin-bottom:6px}
+  h2.sec{margin:0 0 22px; font-size:22px; letter-spacing:.02em}
+  h2.sec .en{font:600 11px/1 var(--mono); color:var(--faint); letter-spacing:.2em; margin-left:12px; vertical-align:middle}
+
+  .panel{background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:18px 20px}
+  .twocol{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  .panel h3{margin:0 0 8px; font:600 12px/1 var(--mono); letter-spacing:.18em; color:var(--dim); text-transform:uppercase}
+
+  /* ---------- 星图 ---------- */
+  .chartbox{background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:10px 6px 2px; margin-top:14px}
+  svg#chart{width:100%; height:auto; display:block}
+  #chart .grid{fill:none; stroke:var(--line); stroke-width:1; stroke-dasharray:2 7}
+  #chart .rel{stroke:var(--line2); stroke-width:1.2; transition:opacity .18s, stroke .18s}
+  #chart.dim .rel{opacity:.1}
+  #chart .rel.hot{opacity:1; stroke:var(--star); stroke-width:1.7}
+  #chart .star{cursor:pointer}
+  #chart .core{fill:var(--star); filter:drop-shadow(0 0 6px rgba(255,233,196,.75))}
+  #chart .halo{fill:rgba(255,233,196,.05); transition:fill .18s}
+  #chart .star:hover .core,#chart .star:focus .core{filter:drop-shadow(0 0 11px rgba(255,233,196,.95))}
+  #chart .star:hover .halo,#chart .star:focus .halo{fill:rgba(255,233,196,.1)}
+  #chart.dim .star{opacity:.4; transition:opacity .18s}
+  #chart.dim .star.hot{opacity:1}
+  #chart .snum{fill:var(--star); font:600 13px var(--mono); text-anchor:middle}
+  #chart .sname{fill:var(--dim); font:12px var(--sans); text-anchor:middle}
+  #chart text{pointer-events:none; user-select:none}
+
+  .relations{margin:14px 0 0; padding:0; list-style:none}
+  .relations li{display:flex; gap:12px; align-items:baseline; padding:7px 2px; border-bottom:1px dashed var(--line); font-size:13.5px}
+  .relations .pair{font:600 12px/1 var(--mono); color:var(--star); white-space:nowrap}
+  .relations .note{color:var(--dim)}
+
+  /* ---------- 大纲：四级折叠 ---------- */
+  details{border:1px solid var(--line); border-radius:6px; background:var(--panel); margin:10px 0}
+  details.mod{border-left:3px solid var(--star)}
+  summary{cursor:pointer; list-style:none; display:flex; align-items:baseline; gap:12px; padding:13px 16px; user-select:none}
+  summary::-webkit-details-marker{display:none}
+  summary .tw{font:600 11px var(--mono); color:var(--faint); transition:transform .18s; display:inline-block; transform:translateY(-1px)}
+  details[open]>summary .tw{transform:rotate(90deg) translateY(-1px)}
+  .mno{font:700 13px var(--mono); color:var(--star); letter-spacing:.05em}
+  .mname{font-size:16.5px; font-weight:650}
+  .mwhy{color:var(--dim); font-size:13px; flex:1; min-width:120px}
+  .mcount,.tcount{font:500 11px/1 var(--mono); color:var(--faint); white-space:nowrap}
+  .refs{display:inline-flex; gap:5px}
+  .ref{font:600 10px/1 var(--mono); color:var(--dim); border:1px solid var(--line2); border-radius:3px; padding:3px 5px}
+  .ref:hover{color:var(--star); border-color:var(--star); text-decoration:none}
+  details.topic,details.chap{margin:8px 14px; background:var(--panel2)}
+  details.topic{border-left:2px solid var(--line2)}
+  .tname{font-weight:600; font-size:15px}
+  .cname{font-weight:550; font-size:14px; color:var(--ink)}
+  .body{padding:2px 16px 12px 30px}
+
+  ul.kps{list-style:none; margin:6px 0; padding:0}
+  li.kp{display:grid; grid-template-columns:minmax(200px,1fr) 2fr; gap:10px 18px;
+        padding:9px 2px; border-bottom:1px dashed var(--line)}
+  li.kp:last-child{border-bottom:none}
+  .kpname{font-size:14px; font-weight:550}
+  .kpname::before{content:"◆ "; color:var(--faint); font-size:9px; vertical-align:2px}
+  .srcs{display:flex; flex-wrap:wrap; gap:6px}
+  .src{display:inline-flex; align-items:center; gap:7px; border:1px solid var(--line);
+       border-left:3px solid var(--mc); border-radius:3px; padding:4px 9px; font-size:12.5px; background:rgba(158,178,214,.03)}
+  .src .code{font:700 9px/1 var(--mono); letter-spacing:.12em; color:var(--mc)}
+  .src .lang{font:600 9px/1 var(--mono); color:var(--faint); border:1px solid var(--line); border-radius:2px; padding:2px 3px}
+  .src a{color:var(--ink)} .src a:hover{color:var(--mc)}
+  body.off-doc   .src[data-t="doc"]{display:none}
+  body.off-blog  .src[data-t="blog"]{display:none}
+  body.off-video .src[data-t="video"]{display:none}
+  body.off-site  .src[data-t="site"]{display:none}
+
+  .ex{margin:10px 14px 14px; background:rgba(255,233,196,.035); border:1px dashed rgba(255,233,196,.25); border-radius:6px; padding:12px 18px}
+  .ex h4{margin:0 0 6px; font:600 11px/1 var(--mono); letter-spacing:.18em; color:var(--star)}
+  .ex ol{margin:0; padding-left:20px; color:var(--dim); font-size:13.5px}
+  .ex li{margin:4px 0}
+  .ex li::marker{color:var(--faint); font-family:var(--mono); font-size:11px}
+
+  /* ---------- 前人路线 / 版本说明 ---------- */
+  ol.paths{list-style:none; margin:0; padding:0}
+  ol.paths li{display:grid; grid-template-columns:64px 1fr; gap:14px; padding:13px 4px; border-bottom:1px solid var(--line)}
+  ol.paths li:last-child{border-bottom:none}
+  .tier{font:700 10px/1.5 var(--mono); letter-spacing:.1em; color:var(--dim);
+        border:1px solid var(--line2); border-radius:3px; height:fit-content; padding:4px 0; text-align:center}
+  .paths .pt{font-weight:600}
+  .paths .pc{color:var(--dim); font-size:13px; margin-top:2px}
+  .colophon{color:var(--dim); font-size:13px}
+  .colophon b{color:var(--star); font-family:var(--mono); font-weight:600}
+  footer.page{margin-top:50px; padding:22px 0 46px; border-top:1px solid var(--line)}
+
+  .empty{border:1px dashed var(--line2); border-radius:6px; padding:30px; text-align:center; color:var(--dim); font-family:var(--mono); font-size:13px}
+
+  @media (max-width:760px){
+    .twocol{grid-template-columns:1fr}
+    li.kp{grid-template-columns:1fr}
+    .mwhy{display:none}
+    summary{flex-wrap:wrap; gap:8px}
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .reveal{animation:rise .45s ease both}
+    @keyframes rise{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+  }
+  @media print{
+    body{background:#fff; color:#141a24; background-image:none}
+    .toolbar{display:none}
+    header.page,footer.page{border-color:#ddd}
+    .panel,.chartbox,details{background:#fff; border-color:#c9d2e0}
+    .chartbox{padding:0}
+    #chart .grid{stroke:#dfe6f0}
+    #chart .rel{stroke:#9aa8bd}
+    #chart .core{fill:#8a6d1f; filter:none}
+    #chart .snum{fill:#8a6d1f} #chart .sname{fill:#556}
+    h1.domain .zh,.chip b,.mno,.relations .pair,.ex h4{color:#8a6d1f}
+    .chip,.ref,.tier{border-color:#bbb; color:#444}
+    a{color:#1a56b8}
+    .src{background:#fff; border-color:#c9d2e0} .src a{color:#1a56b8}
+    details{break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+
+<header class="page"><div class="wrap">
+  <div class="eyebrow">Knowledge Star Chart · 知识星图</div>
+  <h1 class="domain"><span class="zh" id="h-domain"></span> 学习路线</h1>
+  <div class="readout" id="h-chips"></div>
+</div></header>
+
+<div class="toolbar"><div class="wrap"><div class="row" id="toolbar"></div></div></div>
+
+<main class="wrap">
+
+  <section id="sec-map" class="reveal">
+    <div class="sec-eyebrow">Global Map</div>
+    <h2 class="sec">全局地图<span class="en">领域面貌 · 模块拆分 · 关联</span></h2>
+    <div class="twocol">
+      <div class="panel"><h3>领域面貌</h3><p id="ov-landscape"></p></div>
+      <div class="panel"><h3>模块拆分依据</h3><p id="ov-cohesion"></p></div>
+    </div>
+    <div class="chartbox"><svg id="chart" viewBox="0 0 960 560" role="img" aria-label="模块关系星图"></svg></div>
+    <ul class="relations" id="relations"></ul>
+  </section>
+
+  <section id="sec-outline">
+    <div class="sec-eyebrow">Syllabus</div>
+    <h2 class="sec">学习路线<span class="en">模块 → 主题 → 章节 → 知识点</span></h2>
+    <div id="outline"></div>
+  </section>
+
+  <section id="sec-prior" class="reveal">
+    <div class="sec-eyebrow">Prior Paths</div>
+    <h2 class="sec">参考的前人路线<span class="en">大纲骨架来源</span></h2>
+    <ol class="paths" id="paths"></ol>
+  </section>
+
+  <footer class="page"><div class="wrap">
+    <div class="sec-eyebrow">Colophon</div>
+    <h2 class="sec">生成说明</h2>
+    <div class="colophon" id="colophon"></div>
+  </div></footer>
+
+</main>
+
+<script>
+/* DATA-START */
+/* ↓↓↓ 只替换这一个对象。type: doc|blog|video|site；lang: 中|EN；
+   relations.from/to 为模块序号(1 起)；refs 为 priorPaths 序号(0 起)。 */
+const DATA = {
+  domain: "分布式系统（示例数据）",
+  date: "2026-08-21",
+  mode: "prior",                    /* prior=前人路线为骨 | docs=官方文档回退 */
+  level: "零基础",
+  stats: { found: 52, passed: 47, dropped: 5 },
+  overview: {
+    landscape: "分布式系统研究多台机器协同工作时的核心问题：数据如何在节点间复制与一致、机器故障如何容忍、负载如何分布。它由一致性/共识、复制与存储、容错与调度三条主脉构成，彼此耦合。",
+    cohesion: "按知识内聚切成两大块：先立'为什么需要分布、一致意味着什么'的概念骨架，再进入存储与索引的工程实现，避免一上来陷入实现细节。"
+  },
+  relations: [
+    { from: 1, to: 2, note: "一致性模型决定存储层的复制方式与冲突解决策略" }
+  ],
+  modules: [
+    {
+      name: "分布式基础", why: "单机到分布式的动机与核心权衡先立骨架", refs: [0, 1],
+      topics: [
+        { name: "一致性与共识",
+          chapters: [
+            { name: "复制与一致性模型",
+              points: [
+                { name: "强一致与最终一致的取舍",
+                  sources: [
+                    { type: "doc",  lang: "EN", title: "DDIA · Replication", url: "https://dataintensive.net/", note: "权威书配套站" },
+                    { type: "blog", lang: "中",  title: "分布式一致性协议详解", url: "https://example.com/blog-consistency", note: "中文入门" }
+                  ] },
+                { name: "共识协议 Raft",
+                  sources: [
+                    { type: "video", lang: "中", title: "Raft 论文精读", url: "https://example.com/raft-video", note: "B站课程" },
+                    { type: "site",  lang: "EN", title: "raft.github", url: "https://raft.github.io/", note: "官方可视化" }
+                  ] }
+              ] } ] } ],
+      exercises: [
+        "用单机 SQLite 写一个玩具 KV 存储，再拆成两节点同步复制，人为制造网络分区，观察不一致窗口",
+        "对照 raft.github.io 的可视化，手写伪代码复现 Leader 选举的超时逻辑"
+      ]
+    },
+    {
+      name: "存储与索引", why: "概念落地到真实存储引擎的工程实现", refs: [2],
+      topics: [
+        { name: "存储引擎",
+          chapters: [
+            { name: "LSM-Tree 与 B-Tree",
+              points: [
+                { name: "LSM-Tree 写放大与压实",
+                  sources: [
+                    { type: "doc",  lang: "EN", title: "RocksDB Wiki", url: "https://github.com/facebook/rocksdb/wiki", note: "官方文档" }
+                  ] }
+              ] } ] } ],
+      exercises: [ "实现一个最简 LSM-Tree（memtable + SSTable + 简单压实），用随机写压测观察写放大" ]
+    }
+  ],
+  priorPaths: [
+    { tier: "官方",  title: "Google SRE Book", url: "https://sre.google/books/", comment: "官方免费在线书，可靠性工程主线" },
+    { tier: "课表",  title: "MIT 6.5840 Distributed Systems", url: "https://pdos.csail.mit.edu/6.824/", comment: "大学课表，labs 极经典" },
+    { tier: "社区",  title: "r/distributedsystems 精华帖", url: "https://www.reddit.com/r/distributedsystems/", comment: "从业者讨论共识，用于查漏" }
+  ]
+};
+/* DATA-END */
+
+/* ---------- 以下为渲染引擎，生成时勿动 ---------- */
+const MEDIA = {
+  doc:   { code: "DOC",   zh: "文档", color: "var(--c-doc)" },
+  blog:  { code: "BLOG",  zh: "博客", color: "var(--c-blog)" },
+  video: { code: "VID",   zh: "视频", color: "var(--c-video)" },
+  site:  { code: "SITE",  zh: "网站", color: "var(--c-site)" }
+};
+const $ = (s, el) => (el || document).querySelector(s);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g,
+  c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const trunc = (s, n) => (String(s).length > n ? String(s).slice(0, n) + "…" : String(s));
+const countKPs = m => m.topics.reduce((a, t) => a + t.chapters.reduce(
+  (b, c) => b + c.points.length, 0), 0);
+
+function render() {
+  document.title = "知识星图 · " + DATA.domain;
+  $("#h-domain").textContent = DATA.domain;
+
+  const modeZh = DATA.mode === "docs" ? "官方文档回退" : "前人路线为骨";
+  $("#h-chips").innerHTML = [
+    `<span class="chip">日期 <b>${esc(DATA.date)}</b></span>`,
+    `<span class="chip">模式 <b>${esc(modeZh)}</b></span>`,
+    `<span class="chip">受众 <b>${esc(DATA.level || "零基础")}</b></span>`,
+    `<span class="chip">验证 搜到<b>${DATA.stats.found}</b> / 通过<b>${DATA.stats.passed}</b> / 剔除<b>${DATA.stats.dropped}</b></span>`
+  ].join("");
+  $("#ov-landscape").textContent = DATA.overview.landscape;
+  $("#ov-cohesion").textContent = DATA.overview.cohesion;
+
+  /* 工具栏 */
+  const tb = $("#toolbar");
+  tb.innerHTML = Object.entries(MEDIA).map(([k, m]) =>
+    `<button class="fbtn" data-t="${k}" aria-pressed="true" style="--mc:${m.color}" title="显示/隐藏${m.zh}类来源">` +
+    `<span class="dot"></span>${m.code} ${m.zh}</button>`).join("") +
+    `<span class="sep"></span>` +
+    `<button class="fbtn plain" id="btn-exp">展开全部</button>` +
+    `<button class="fbtn plain" id="btn-col">收起全部</button>` +
+    `<span class="sep"></span>` +
+    DATA.modules.map((m, i) =>
+      `<a class="mjump" href="#mod-${i + 1}">M${i + 1} ${esc(trunc(m.name, 8))}</a>`).join("");
+  tb.querySelectorAll(".fbtn[data-t]").forEach(b => b.addEventListener("click", () => {
+    const on = b.getAttribute("aria-pressed") === "true";
+    b.setAttribute("aria-pressed", String(!on));
+    document.body.classList.toggle("off-" + b.dataset.t, on);
+  }));
+  $("#btn-exp").addEventListener("click", () => document.querySelectorAll("details").forEach(d => d.open = true));
+  $("#btn-col").addEventListener("click", () => document.querySelectorAll("details").forEach(d => d.open = false));
+
+  /* 关系列表 */
+  $("#relations").innerHTML = (DATA.relations || []).map(r =>
+    `<li><span class="pair">M${r.from} ⇄ M${r.to}</span><span class="note">${esc(r.note)}</span></li>`).join("");
+
+  /* 大纲 */
+  $("#outline").innerHTML = DATA.modules.map((m, mi) => {
+    const kps = countKPs(m), tps = m.topics.length;
+    const srcs = m.topics.flatMap(t => t.chapters.flatMap(c => c.points.flatMap(p => p.sources))).length;
+    const refs = (m.refs || []).map(i =>
+      `<a class="ref" href="#prior-${i}" title="${esc((DATA.priorPaths[i] || {}).title || "")}">R${i + 1}</a>`).join("");
+    const topics = m.topics.map(t => {
+      const chapKps = t.chapters.reduce((a, c) => a + c.points.length, 0);
+      const chapters = t.chapters.map(c => {
+        const pts = c.points.map(p => {
+          const ss = p.sources.map(s => {
+            const md = MEDIA[s.type] || MEDIA.site;
+            return `<span class="src" data-t="${esc(s.type)}" style="--mc:${md.color}" title="${esc(s.note || "")}">` +
+              `<span class="code">${md.code}</span><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>` +
+              `<span class="lang">${esc(s.lang)}</span></span>`;
+          }).join("");
+          return `<li class="kp"><div class="kpname">${esc(p.name)}</div><div class="srcs">${ss}</div></li>`;
+        }).join("");
+        return `<details class="chap"><summary><span class="tw">▸</span><span class="cname">${esc(c.name)}</span>` +
+               `<span class="tcount">${c.points.length} 知识点</span></summary><div class="body"><ul class="kps">${pts}</ul></div></details>`;
+      }).join("");
+      return `<details class="topic"><summary><span class="tw">▸</span><span class="tname">${esc(t.name)}</span>` +
+             `<span class="tcount">${t.chapters.length} 章节 · ${chapKps} 知识点</span></summary><div class="body">${chapters}</div></details>`;
+    }).join("");
+    const exs = (m.exercises || []).map(e => `<li>${esc(e)}</li>`).join("");
+    return `<details class="mod" id="mod-${mi + 1}"${mi === 0 ? " open" : ""}>` +
+      `<summary><span class="tw">▸</span><span class="mno">M${mi + 1}</span><span class="mname">${esc(m.name)}</span>` +
+      `<span class="mwhy">${esc(m.why)}</span><span class="refs">${refs}</span>` +
+      `<span class="mcount">${tps} 主题 · ${srcs} 源</span></summary>` +
+      `<div class="body">${topics}<div class="ex"><h4>练习</h4><ol>${exs}</ol></div></div></details>`;
+  }).join("");
+
+  /* 前人路线 */
+  $("#paths").innerHTML = DATA.priorPaths.map((p, i) =>
+    `<li id="prior-${i}"><span class="tier">${esc(p.tier)}</span>` +
+    `<div><div class="pt"><a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title)}</a></div>` +
+    `<div class="pc">${esc(p.comment)}</div></div></li>`).join("");
+
+  /* 版本说明 */
+  const s = DATA.stats;
+  $("#colophon").innerHTML =
+    `本路线由 <b>anything-roadmap</b> 于 <b>${esc(DATA.date)}</b> 生成，骨架模式：<b>${esc(modeZh)}</b>。` +
+    `共检索 <b>${s.found}</b> 个候选来源，逐条打开验证通过 <b>${s.passed}</b>、剔除 <b>${s.dropped}</b>（死链/不对题/不够权威）。` +
+    `受众假设：<b>${esc(DATA.level || "零基础")}</b>。` +
+    (DATA.mode === "docs"
+      ? "该领域未找到 ≥2 条可信现成学习路线，已按官方文档目录结构组织并在此声明。"
+      : "主题树由附录所列前人路线合成，模型知识仅用于补缝隙。") +
+    ` 本页面为一次性快照、零外部依赖，可离线打开；来源老化时请整份重新生成，对成品的纠正意见也以全新重跑处理。`;
+
+  buildChart();
+}
+
+/* ---------- 星图 ---------- */
+function buildChart() {
+  const svg = $("#chart"), W = 960, H = 560, CX = 480, CY = 292, R = 205;
+  const n = DATA.modules.length;
+  const pos = DATA.modules.map((_, i) => {
+    const a = i * 2.39996 - Math.PI / 2, r = R * Math.sqrt((i + 0.7) / n);
+    return { x: CX + r * Math.cos(a), y: CY + r * Math.sin(a) };
+  });
+  let g = "";
+  [70, 140, 205].forEach(r => g += `<circle cx="${CX}" cy="${CY}" r="${r}" class="grid"/>`);
+  g += `<line x1="${CX - R - 45}" y1="${CY}" x2="${CX + R + 45}" y2="${CY}" class="grid"/>`;
+  g += `<line x1="${CX}" y1="${CY - R - 45}" x2="${CX}" y2="${CY + R + 45}" class="grid"/>`;
+  (DATA.relations || []).forEach(rel => {
+    const p = pos[rel.from - 1], q = pos[rel.to - 1];
+    if (!p || !q) return;
+    g += `<line x1="${p.x}" y1="${p.y}" x2="${q.x}" y2="${q.y}" class="rel" ` +
+         `data-from="${rel.from}" data-to="${rel.to}"><title>M${rel.from} ⇄ M${rel.to} · ${esc(rel.note)}</title></line>`;
+  });
+  DATA.modules.forEach((m, i) => {
+    const p = pos[i], rad = Math.min(16, 6 + Math.sqrt(countKPs(m)) * 2.2);
+    g += `<g class="star" data-m="${i + 1}" tabindex="0" role="link" aria-label="跳转到模块 M${i + 1} ${esc(m.name)}">` +
+         `<circle cx="${p.x}" cy="${p.y}" r="${rad + 8}" class="halo"/>` +
+         `<circle cx="${p.x}" cy="${p.y}" r="${rad}" class="core"/>` +
+         `<text x="${p.x}" y="${p.y + rad + 22}" class="snum">M${i + 1}</text>` +
+         `<text x="${p.x}" y="${p.y + rad + 39}" class="sname">${esc(trunc(m.name, 9))}</text></g>`;
+  });
+  svg.innerHTML = g;
+
+  svg.querySelectorAll(".star").forEach(st => {
+    const m = +st.dataset.m;
+    const on = () => {
+      svg.classList.add("dim");
+      svg.querySelectorAll(`.rel[data-from="${m}"],.rel[data-to="${m}"]`).forEach(l => l.classList.add("hot"));
+      st.classList.add("hot");
+    };
+    const off = () => {
+      svg.classList.remove("dim");
+      svg.querySelectorAll(".rel.hot").forEach(l => l.classList.remove("hot"));
+      st.classList.remove("hot");
+    };
+    const go = () => { location.hash = "#mod-" + m; };
+    st.addEventListener("mouseenter", on);  st.addEventListener("mouseleave", off);
+    st.addEventListener("focus", on);       st.addEventListener("blur", off);
+    st.addEventListener("click", go);
+    st.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
+  });
+}
+
+/* ---------- 自检与启动 ---------- */
+if (!DATA.modules || !DATA.modules.length) {
+  document.body.insertAdjacentHTML("afterbegin",
+    `<div class="wrap"><div class="empty" style="margin-top:40px">DATA 为空：请用真实领域数据替换 DATA-START / DATA-END 之间的对象</div></div>`);
+} else {
+  render();
+  window.addEventListener("beforeprint", () =>
+    document.querySelectorAll("details").forEach(d => d.open = true));
+  console.log("[star-chart] rendered:",
+    DATA.modules.length, "modules /",
+    DATA.modules.reduce((a, m) => a + countKPs(m), 0), "knowledge points");
+}
+</script>
+</body>
+</html>
