@@ -1,6 +1,8 @@
 # 调研卷宗模板（research.md）
 
-> 本文件是 anything-research 的产出 schema 正本。生成时复制本结构到 `<主题>-research-<YYYYMMDD>/research.md` 并填实；章节顺序与命名不可改，内容按实际填写。文末附无工具环境版提示词。
+> **定位**：证据底座，给 AI 消费（anything-roadmap 的骨架来源）与人工回查；**给人读的主交付物是 report.md**（见 report-template.md）——先成卷宗，再从卷宗提炼报告。
+>
+> 本文件是卷宗的 schema 正本。生成时复制本结构到 `<主题>-research-<YYYYMMDD>/research.md` 并填实；章节顺序与命名不可改，内容按实际填写。文末附无工具环境版提示词。
 
 ---
 

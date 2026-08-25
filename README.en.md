@@ -22,7 +22,7 @@ Installs both skills at once (multi-skill repo layout). Or manually: copy the `s
 
 ## anything-research — deep-research engine
 
-Runs multi-round iterative research on any question (technology selection, market research, due diligence, fact-checking, background checks) and produces an evidence-chained dossier `research.md`. Four depth standards:
+Runs multi-round iterative research on any question (technology selection, market research, due diligence, fact-checking, background checks) with **dual artifacts**: `report.md` (the human-readable research report — overview / landscape / insights / synthesis, emphasized by `purpose=understand|decide`) + `research.md` (the AI-facing evidence dossier — evidence tables / confidence / iteration trace, consumed by anything-roadmap). Four depth standards:
 
 1. **Iterative** — each later round is driven by new leads surfaced by reading the previous round; every round is logged in an iteration trace;
 2. **Cross-validated** — key claims need ≥2 independent sources; single-source claims are explicitly flagged;
