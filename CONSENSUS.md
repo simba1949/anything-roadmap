@@ -1,6 +1,6 @@
-# anything-roadmap 设计共识（CONSENSUS）
+# anything 管线设计共识（CONSENSUS）
 
-> 本文档固化 anything-roadmap 从设计到发布、再到两轮实战迭代的全部共识与理由。它是决策正本：README 讲"它是什么"，本文讲"为什么这么设计"与"怎么运营"。更新时间：2026-08-21。
+> 本文档固化 anything-research + anything-roadmap 两 skill 从设计到发布、再到实战迭代的全部共识与理由。它是决策正本：README 讲"它是什么"，本文讲"为什么这么设计"与"怎么运营"。更新时间：2026-08-25。
 
 ## 1. 定位与交付物
 
@@ -18,7 +18,7 @@
 
 ## 3. 流程（一站到底）
 
-消歧 → 探测搜索通道 → 前人路线调研 → 合成主题树 → 搜源 → 逐条验证 → 双格式成稿 → **交付（对话中列完整路径 + 发文件）**。
+消歧 → **卷宗检测（复用 / 调 anything-research 五问 / 回退自行调研）** → 探测搜索通道 → 合成主题树 → 搜源 → 逐条验证 → 成稿 → **交付（对话中列全部产物路径 + 发文件）**。
 
 - **铁律一 零幻觉链接**：每个入选 URL 必须真实打开验证（活着/对题/权威三问），不过不放。
 - **铁律二 一站到底**：中途不设检查点；用户事后纠正 = **带纠正意见全新重跑**整份（新日期目录），绝不修补旧稿。
@@ -59,24 +59,30 @@
 
 当前目录 `./<领域>-roadmap-<YYYYMMDD>/`：
 
-- `syllabus.md` — 全内容（骨架见 SKILL.md）。
-- `index.html` — 复制 `references/template.html`，只替换 `<script>` 内 `DATA-START`/`DATA-END` 之间的 DATA 对象；其余不动。
+- `roadmap.md` — 全内容（骨架见 SKILL.md）。
+- `roadmap.html` — 复制 `references/template.html`，只替换 `<script>` 内 `DATA-START`/`DATA-END` 之间的 DATA 对象；其余不动。
+- `research.md` — 调研卷宗，**仅当本次通过 anything-research 生成时存在**；复用旧卷宗时不复制进本目录，在 roadmap.md 附录 B 引用其路径。
+- **改名记录（2026-08-25）**：`syllabus.md/index.html` → `roadmap.md/roadmap.html`，同步改 SKILL.md、template 注释、DESIGN-PROMPT；**历史已交付成品（agent-skills/hermes 两目录）不重命名不重生成**。
 - **模板拼接坑（已修）**：模板顶部注释里不得出现字面量 `/* DATA-START */`（会吞掉数据），拼接锚点用 `<script>` 之后的标记。
-- **零 CDN 自检**：`grep -E 'src="http|link[^>]*href="http' index.html` 必须为空。
-- **交付**：生成结束在对话中列两个产物的完整绝对路径，并发送文件给用户。
+- **零 CDN 自检**：`grep -E 'src="http|link[^>]*href="http' roadmap.html` 必须为空。
+- **交付**：生成结束在对话中列全部产物（roadmap.md、roadmap.html、本次生成的 research.md）的完整绝对路径，并发送文件给用户。
 
-## 8. index.html 视觉系统（2026-08-21 重设计定稿）
+## 8. roadmap.html 视觉系统（2026-08-21 重设计定稿）
 
 - 隐喻：**领地地图 / Field Atlas**（roadmap 本义是地图）——模块=不规则地物轮廓的"领地"（面积按知识点数数据驱动 + 交叉影线 clip-path），关系=虚线路线+途径点，经纬网格 + 罗盘；签名元素 = 可点击领地地图（悬停高亮关联路线并淡出其余，点击/键盘下钻）。
 - 调色（暗色科技感，离开深空蓝）：暖石墨底 `#0e1217` + 象牙墨 `#e9e5d9` + 铜金主强调 `#c9a36a`；媒介=制图墨色（文档钢蓝 `#6ea8d8` / 博客铜金 `#d8b46a` / 视频陶土 `#d87a6a` / 网站鼠尾草绿 `#8ab09a`）。
 - 字体：标题 Georgia 衬线（只一两处）、数据/标签等宽、正文无衬线。
 - HUD 细节（用户手工迭代）：氛围扫描线 + 暗角、图面十字准星跟随鼠标 + 读数、工具栏滚动投影、模块跳转高亮、面包屑。
 - 约束不变：单文件自包含、零 CDN、离线可开、DATA 契约不变（老成品换新皮只需重拼）、打印自动展开转浅色、无障碍（焦点/键盘/reduced-motion）。
+- **v2（2026-08-24）交互加固**（视觉 token 与 DATA 契约不变）：锚点跳转统一走 jumpTo——自动展开目标、避开粘性工具栏、落点高亮（含开页带 hash、前进/后退、地图领地点击）；工具栏新增"下钻"深度组（收起/模块/主题/全部）与实时"来源 n/m"计数；按媒介筛选时空知识点行降透明度并提示；模块摘要加关联 ⇄Mn 芯片，关系清单条目可点击且悬停点亮地图路线；地图加领地越界钳制与标签描边光晕（多模块不溢出不糊字）。打磨轮：三级文本色 `--faint` 校准至 ≈5:1（过小字号 4.5:1 门槛）；中文标题行高按 CJK 基线（h1 1.3、h2 1.35、mname 1.4，h1 字距归零）；colophon 限行长；relchip 纳入打印浅色规则。
+- **总监轮（2026-08-24）**：示例 DATA 扩到 4 模块 / 4 关系（新增源用 kubernetes.io、prometheus.io、opentelemetry.io 等真实官方文档，占位显式标"示例"），地图/跳转/下钻/筛选得以完整演示；页眉与分节节奏收紧使地图进入首屏；小屏工具栏改单行横滑（sticky 高度恒定、触达尺寸不缩）；HUD 读数在空白图面显示实时坐标。视觉 token 与 DATA 契约不变。
+- **验收轮（2026-08-24，对照设计提示词 §2/§6/§7）**：边界加固——空 exercises 不渲染"勘测练习"空框、空 sources 知识点显示"暂无来源"诚实占位、overview/stats 缺失回退不渲染 undefined；以 7 模块边界 DATA（空 relations、缺 exercises、空 sources、缺 stats、mode=docs、长名称）重渲染回归通过；硬约束七条与 v2 交互基线逐条对账全过。
 
 ## 9. 发布与生态
 
-- 仓库：`github.com/simba1949/anything-roadmap`（公开，MIT，单 skill 根布局：根 `SKILL.md` + `references/`）。
-- 安装：`npx skills add simba1949/anything-roadmap`（实测 `skills use` 可发现）；手动装=把根 `SKILL.md` + `references/` 放进 `~/.claude/skills/anything-roadmap/`。
+- 仓库：`github.com/simba1949/anything-roadmap`（公开，MIT，**多 skill 布局（2026-08-25 起）**：`skills/anything-research/` + `skills/anything-roadmap/`）。
+  - 推翻记录：此前拍板"只作单个仓库（根级单 skill）"，2026-08-25 为容纳管线第二 skill 明确推翻——两 skill 本是一个管线的两节，分仓库割裂契约。
+- 安装：`npx skills add simba1949/anything-roadmap` **一次装齐两个 skill**；手动装=把 `skills/<name>/` 各自放进 `~/.claude/skills/<name>/`。
 - README：`README.md` 中文默认 + `README.en.md` 英文，顶部互链；GitHub 首页默认展示中文。
 - 本地开发副本：`~/.claude/skills/anything-roadmap/`（含发布版已泛化，去掉 cangjie/nuwa 私有引用）。
 - 版权署名 `simba1949`；改动保持两份同步后提交推送。
@@ -99,3 +105,23 @@
 - skill 是正本，`playbook.md` 是它的无工具环境投影——规则变更两处同改。
 - 纠错 = 全新重跑；源老化 = 整份重跑；一次性快照，不做增量刷新。
 - 本文档随设计变更更新（记日期与理由）。
+
+## 13. anything-research（2026-08-25 新增，管线前端）
+
+- **定位**：深度调研引擎——任意研究问题的多轮迭代调研，产出调研卷宗；也是 anything-roadmap 的调研前端（教学五问模式）。
+- **调用**：`/anything-research <研究问题> [深度=浅|中|深] [轮数=N]`；触发仅显式斜杠 + 深度类触发词（"深度调研/深度研究/出调研报告/deep research"），**浅查词（"帮我查一下/全网捞一下"）归 agent-reach**。
+- **深度四标准（铁律）**：迭代性（后轮由前轮阅读驱动，迭代轨迹必录）、交叉验证（关键论断 ≥2 独立源，孤证标注）、全文级阅读（不吃摘要片段）、矛盾呈现（分歧章节对垒）；来源分级一手>二手>聚合。
+- **分层架构**：流程引擎（本 skill）→ 探测复用 agent-reach（通道层）→ 降级内置。不是薄壳——四条深度标准全是流程层的活。
+- **迭代实现**：子代理扇出搜索，主代理保留上下文做全文阅读、追问生成、综合裁决。
+- **三闸停止 + 档位常量表**（常量表在 SKILL.md 开头，改它即改默认；`轮数=N` 临时覆盖）：浅 2轮/25候选/15入卷、中（默认）4轮/60/30、深 6轮/100/50；收益递减闸（一轮无新增论断且无新矛盾→提前停并声明）。
+- **产出**：`./<主题>-research-<YYYYMMDD>/research.md`，唯一产物、纯 Markdown；schema 正本=`skills/anything-research/references/dossier-template.md`（研究问题与范围/关键发现+证据表[论断|置信度|来源|层级]/分歧与矛盾/信息缺口/迭代轨迹/分级来源清单/教学预埋五问）。
+- **卷宗使用契约**：教学五问模式下 research.md 写入 roadmap 输出目录；复用检测（同领域、7 天内、取最新）由 roadmap 侧执行；本 skill 无任何硬依赖。
+
+## 14. 管线契约（research → roadmap → 未来教学 skill）
+
+- 顺序与产物：`/anything-research` → research.md → `/anything-roadmap` → roadmap.md + roadmap.html（+ research.md）→（未来）系统化教学 skill 读三件套授课。
+- roadmap 消费卷宗的字段映射：§7.2 公认学习路径→主题树骨架与附录 A；§7.3 权威资源→搜源优先池；§7.5 难度与前置→模块间关联；§7.4 常见误解→练习设计素材。
+- 使用姿势：**先深研后成图**（手动两步，卷宗 7 天内可复用）或**一站式**（roadmap 自动拉起五问调研）；不复用就删除卷宗目录，不做增量修补。
+- 触发总表：`/anything-research` `深度调研` → research；`/anything-roadmap` `学习路线/大纲` → roadmap；`帮我查/全网调研` → agent-reach（浅查）。
+- 验收场景（建成后试跑）：① 教学五问（真实领域）② 选型对比（看交叉验证与矛盾呈现）。
+

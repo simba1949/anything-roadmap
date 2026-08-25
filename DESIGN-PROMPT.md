@@ -1,4 +1,4 @@
-# anything-roadmap · index.html 模板设计提示词
+# anything-roadmap · roadmap.html 模板设计提示词
 
 > **用途**：把本提示词（整份）连同当前的 `references/template.html` 交给 AI（推荐带浏览器实测能力的 Claude Code），用于对 HTML 模板做全新重设计或迭代。所有改动必须落在下面共识框架内；框架外的发挥先提方案再动手。
 >
@@ -23,7 +23,7 @@
 4. **确定性渲染**：不用 `Math.random()` / `new Date()` 之类不稳定因素——领地形状、排布全部由模块序号经确定函数（黄金角螺旋 + 多频正弦径向扰动）派生，同一数据永远渲染同一张图。
 5. **打印友好**：`@media print` 自动展开全部折叠、转浅色主题、`break-inside:avoid` 防截断。
 6. **无障碍质量线**：焦点可见（`:focus-visible`）、地图与全部交互可键盘操作、`prefers-reduced-motion` 时关闭动效、文本对比度达标（最小字号文本 ≥4.5:1）。
-7. **自检命令必须通过**：`grep -E 'src="http|link[^>]*href="http' index.html` 为空；`const DATA` 全文恰好出现 1 次。
+7. **自检命令必须通过**：`grep -E 'src="http|link[^>]*href="http' roadmap.html` 为空；`const DATA` 全文恰好出现 1 次。
 
 ## 3. DATA 契约（只读参考）
 
@@ -79,7 +79,7 @@ DATA = {
 
 - ❌ 改 DATA schema 或把渲染逻辑写死具体领域的数据
 - ❌ 引入任何外部资源或需要网络的特性（埋点、CDN、webfont、头像）
-- ❌ 动 `syllabus.md` 的生成逻辑（模板只管 HTML）
+- ❌ 动 `roadmap.md` 的生成逻辑（模板只管 HTML）
 - ❌ 加时间表/打卡/进度追踪类 UI（共识明确不做）
 - ❌ 一次堆多个大胆元素——签名只有一个，其余做减法
 
