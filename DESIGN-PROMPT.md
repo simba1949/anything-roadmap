@@ -35,9 +35,12 @@ DATA = {
   relations: [{ from, to, note }],            // 模块序号从 1 起
   modules: [{
     name, why, refs: [priorPaths 索引],
-    topics: [{ name, chapters: [{ name, points: [{
-      name, sources: [{ type: "doc"|"blog"|"video"|"site", lang: "中"|"EN", title, url, note }]
-    }]}]}],
+    // 层级自适应（2-5 级）：模块可直挂 points（二级）；topics 可直挂 points（三级）；
+    // chapters 可直挂 points（四级，默认）；经 sections（五级）。任一中间层可省，
+    // 中间层必须聚合 ≥2 个子节点。sources: { type, lang, title, url, note }
+    topics?:   [{ name, chapters?: [{ name, sections?: [{ name, points }],
+                points? }], points? }],
+    points?:   [...],
     exercises: [string]
   }],
   priorPaths: [{ tier, title, url, comment }]
@@ -57,7 +60,7 @@ DATA = {
 
 ## 5. 页面结构（区块可演进，职责不可丢）
 
-页眉（eyebrow + 领域名 + 读数 chips）→ 粘性工具栏 → ①全局地图（领域全貌/拆分依据双面板 + 领地地图 + 图例 + 关系清单）→ ②学习路线（模块→主题→章节→知识点四级折叠树 + 每模块勘测练习）→ ③参考图源（前人路线表）→ 勘测说明（colophon，含验证统计与生成声明）。
+页眉（eyebrow + 领域名 + 读数 chips）→ 粘性工具栏 → ①全局地图（领域全貌/拆分依据双面板 + 领地地图 + 图例 + 关系清单）→ ②学习路线（层级自适应 2-5 级折叠树 + 每模块勘测练习）→ ③参考图源（前人路线表）→ 勘测说明（colophon，含验证统计与生成声明）。
 
 ## 6. 交互基线（v2 能力清单——只能增不能减）
 

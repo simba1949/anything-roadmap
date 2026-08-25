@@ -35,12 +35,12 @@ The dossier contains: key findings (claim | confidence | evidence table), disagr
 
 ## anything-roadmap — systematic learning-roadmap generator
 
-Invoke `/anything-roadmap <domain> [one-line background]` (defaults to zero-basics) to generate a four-level outline (module → topic → chapter → knowledge point):
+Invoke `/anything-roadmap <domain> [one-line background]` (defaults to zero-basics) to generate an adaptively-leveled outline (2-5 levels by knowledge-point count: module → topic → chapter → section → knowledge point, intermediate levels omittable, no filler levels):
 
 1. **Dossier detection**: reuses a same-domain research.md from the last 7 days if present; otherwise invokes anything-research in teaching-five-questions mode (the dossier becomes the third artifact); falls back to self-conducted prior-path research when neither is available.
 2. **Outline rules**: prior learning paths as the backbone (credibility ladder), split by knowledge cohesion, global map + inter-module relations, exercises per module; no timetables, no assessment gates.
 3. **Verified sources**: ≤3 sources per knowledge point, ~40 per roadmap; English authorities as backbone, Chinese tutorials as scaffolding; every included link is actually opened and verified (alive / on-topic / authoritative) — zero hallucinated links, with a verification summary.
-4. **Artifacts**: `roadmap.md` + self-contained interactive `roadmap.html` (dark territory-map: modules as lands, relations as routes, four-level drill-down, media filtering, anchor jumps, zero CDN, works offline).
+4. **Artifacts**: `roadmap.md` + self-contained interactive `roadmap.html` (dark territory-map: modules as lands, relations as routes, adaptive-depth drill-down, media filtering, anchor jumps, zero CDN, works offline).
 5. **Methodology export**: `skills/anything-roadmap/references/playbook.md` can be pasted into tool-less AIs (with an explicit verification-degradation notice).
 
 ## Shared design principles

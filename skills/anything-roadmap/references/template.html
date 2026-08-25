@@ -171,7 +171,7 @@
   .relchip{font:700 10px/1 var(--mono); letter-spacing:.04em; color:var(--brass); white-space:nowrap;
            border:1px solid rgba(201,163,106,.4); border-radius:3px; padding:4px 6px}
   .relchip:hover{color:var(--ink); border-color:var(--brass); background:rgba(201,163,106,.12); text-decoration:none}
-  details.topic,details.chap{margin:8px 16px; background:var(--panel2)}
+  details.topic,details.chap,details.sect{margin:8px 16px; background:var(--panel2)}
   details.topic{border-left:2px solid var(--line2)}
   .tname{font-weight:600; font-size:15px}
   .cname{font-weight:550; font-size:14px}
@@ -342,7 +342,11 @@
 <script>
 /* DATA-START */
 /* ↓↓↓ 只替换这一个对象。type: doc|blog|video|site；lang: 中|EN；
-   relations.from/to 为模块序号(1 起)；refs 为 priorPaths 序号(0 起)。 */
+   relations.from/to 为模块序号(1 起)；refs 为 priorPaths 序号(0 起)。
+   层级自适应（v3）：模块(必) → topics → chapters → sections → points，
+   任一中间层可省略——points 直挂模块=二级；topics 直挂 points=三级；
+   chapters 直挂 points=四级；经 sections=五级。同一份大纲内不同模块
+   可用不同深度；中间层必须聚合 ≥2 个子节点，不为凑层级造空壳层。 */
 const DATA = {
   domain: "分布式系统（示例数据）",
   date: "2026-08-21",
@@ -385,16 +389,16 @@ const DATA = {
     },
     {
       name: "存储与索引", why: "概念落地到真实存储引擎的工程实现", refs: [2],
-      topics: [
-        { name: "存储引擎",
-          chapters: [
-            { name: "LSM-Tree 与 B-Tree",
-              points: [
-                { name: "LSM-Tree 写放大与压实",
-                  sources: [
-                    { type: "doc", lang: "EN", title: "RocksDB Wiki", url: "https://github.com/facebook/rocksdb/wiki", note: "官方文档" }
-                  ] }
-              ] } ] } ],
+      points: [
+        { name: "LSM-Tree 写放大与压实",
+          sources: [
+            { type: "doc", lang: "EN", title: "RocksDB Wiki", url: "https://github.com/facebook/rocksdb/wiki", note: "官方文档" }
+          ] },
+        { name: "B-Tree 与页布局",
+          sources: [
+            { type: "doc", lang: "EN", title: "CMU 15-445 · Tree Indexes", url: "https://15445.courses.cs.cmu.edu/", note: "大学课表" }
+          ] }
+      ],
       exercises: [ "实现一个最简 LSM-Tree（memtable + SSTable + 简单压实），用随机写压测观察写放大" ]
     },
     {
@@ -403,14 +407,24 @@ const DATA = {
         { name: "调度与编排",
           chapters: [
             { name: "Kubernetes 基础",
-              points: [
-                { name: "Pod 生命周期与探针",
-                  sources: [
-                    { type: "doc", lang: "EN", title: "Kubernetes · Pod Lifecycle", url: "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/", note: "官方文档" }
+              sections: [
+                { name: "Pod 运行模型",
+                  points: [
+                    { name: "Pod 生命周期与探针",
+                      sources: [
+                        { type: "doc", lang: "EN", title: "Kubernetes · Pod Lifecycle", url: "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/", note: "官方文档" }
+                      ] },
+                    { name: "资源调度与驱逐",
+                      sources: [
+                        { type: "doc", lang: "EN", title: "Kubernetes · Scheduling & Eviction", url: "https://kubernetes.io/docs/concepts/scheduling-eviction/", note: "官方文档" }
+                      ] }
                   ] },
-                { name: "资源调度与驱逐",
-                  sources: [
-                    { type: "doc", lang: "EN", title: "Kubernetes · Scheduling & Eviction", url: "https://kubernetes.io/docs/concepts/scheduling-eviction/", note: "官方文档" }
+                { name: "控制面组件",
+                  points: [
+                    { name: "etcd 与调度器/watch 机制",
+                      sources: [
+                        { type: "doc", lang: "EN", title: "Kubernetes · Control Plane", url: "https://kubernetes.io/docs/concepts/overview/components/", note: "官方文档" }
+                      ] }
                   ] }
               ] },
             { name: "稳定性模式",
@@ -427,17 +441,14 @@ const DATA = {
       name: "可观测性与运维", why: "用指标、日志、追踪把前三个模块的论断变成可验证的", refs: [0],
       topics: [
         { name: "可观测性",
-          chapters: [
-            { name: "三支柱",
-              points: [
-                { name: "指标与 PromQL",
-                  sources: [
-                    { type: "doc", lang: "EN", title: "Prometheus · Querying Basics", url: "https://prometheus.io/docs/prometheus/latest/querying/basics/", note: "官方文档" }
-                  ] },
-                { name: "分布式追踪",
-                  sources: [
-                    { type: "doc", lang: "EN", title: "OpenTelemetry Docs", url: "https://opentelemetry.io/docs/", note: "官方文档" }
-                  ] }
+          points: [
+            { name: "指标与 PromQL",
+              sources: [
+                { type: "doc", lang: "EN", title: "Prometheus · Querying Basics", url: "https://prometheus.io/docs/prometheus/latest/querying/basics/", note: "官方文档" }
+              ] },
+            { name: "分布式追踪",
+              sources: [
+                { type: "doc", lang: "EN", title: "OpenTelemetry Docs", url: "https://opentelemetry.io/docs/", note: "官方文档" }
               ] }
           ] } ],
       exercises: [ "为玩具 KV 存储暴露延迟直方图，写两条 PromQL：P99 延迟与错误率" ]
@@ -462,10 +473,46 @@ const $ = (s, el) => (el || document).querySelector(s);
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g,
   c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const trunc = (s, n) => (String(s).length > n ? String(s).slice(0, n) + "…" : String(s));
-const countKPs = m => m.topics.reduce((a, t) => a + t.chapters.reduce(
-  (b, c) => b + c.points.length, 0), 0);
-const moduleSources = m => m.topics.flatMap(t => t.chapters.flatMap(c => c.points.flatMap(p => p.sources)));
+const pointsOf = n =>
+  n.points ? n.points
+  : n.sections ? n.sections.flatMap(pointsOf)
+  : n.chapters ? n.chapters.flatMap(pointsOf)
+  : n.topics ? n.topics.flatMap(pointsOf)
+  : [];
+const countKPs = m => pointsOf(m).length;
+const moduleSources = m => pointsOf(m).flatMap(p => p.sources || []);
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- 层级自适应渲染（模块 → topics → chapters → sections → points，任一中间层可省略） ---------- */
+const LEVEL = {
+  topics:   { cls: "topic", nm: "tname" },
+  chapters: { cls: "chap",  nm: "cname" },
+  sections: { cls: "sect",  nm: "cname" }
+};
+function kpsHTML(points) {
+  return `<ul class="kps">` + points.map(p => {
+    const ss = (p.sources || []).map(s => {
+      const md = MEDIA[s.type] || MEDIA.site;
+      return `<span class="src" data-t="${esc(s.type)}" style="--mc:${md.color}" title="点击复制：${esc(s.url)}" data-url="${esc(s.url)}">` +
+        `<span class="code">${md.code}</span><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>` +
+        `<span class="lang">${esc(s.lang)}</span></span>`;
+    }).join("");
+    const nosrc = (p.sources || []).length ? "" : `<span class="nosrc">暂无来源</span>`;
+    return `<li class="kp"><div class="kpname">${esc(p.name)}</div><div class="srcs">${ss}${nosrc}</div></li>`;
+  }).join("") + `</ul>`;
+}
+function levelHTML(nodes, kind) {
+  const M = LEVEL[kind];
+  return nodes.map(nd => {
+    let kids = "", count = "";
+    if (nd.points) { kids = kpsHTML(nd.points); count = `${nd.points.length} 知识点`; }
+    else if (nd.topics) { kids = levelHTML(nd.topics, "topics"); count = `${nd.topics.length} 主题 · ${pointsOf(nd).length} 知识点`; }
+    else if (nd.chapters) { kids = levelHTML(nd.chapters, "chapters"); count = `${nd.chapters.length} 章节 · ${pointsOf(nd).length} 知识点`; }
+    else if (nd.sections) { kids = levelHTML(nd.sections, "sections"); count = `${nd.sections.length} 节 · ${pointsOf(nd).length} 知识点`; }
+    return `<details class="${M.cls}"><summary><span class="tw">▸</span><span class="${M.nm}">${esc(nd.name)}</span>` +
+           `<span class="tcount">${count}</span></summary><div class="body">${kids}</div></details>`;
+  }).join("");
+}
 
 function toast(msg) {
   const t = $("#toast");
@@ -531,9 +578,9 @@ function render() {
     `<a class="pair" href="#mod-${r.from}" title="跳转到 M${r.from}">M${r.from} ⇄ M${r.to}</a>` +
     `<span class="note">${esc(r.note)}</span></li>`).join("");
 
-  /* 大纲：模块 → 主题 → 章节 → 知识点（四级折叠） */
+  /* 大纲：层级自适应（模块 → topics → chapters → sections → points，任一中间层可省略） */
   $("#outline").innerHTML = DATA.modules.map((m, mi) => {
-    const kps = countKPs(m), tps = m.topics.length;
+    const kps = countKPs(m);
     const srcs = moduleSources(m).length;
     const refs = (m.refs || []).map(i =>
       `<a class="ref" href="#prior-${i}" title="${esc((DATA.priorPaths[i] || {}).title || "")}">R${i + 1}</a>`).join("");
@@ -543,32 +590,15 @@ function render() {
         const o = r.from === mi + 1 ? r.to : r.from;
         return `<a class="relchip" href="#mod-${o}" title="${esc(r.note)}">⇄ M${o}</a>`;
       }).join("");
-    const topics = m.topics.map(t => {
-      const chapKps = t.chapters.reduce((a, c) => a + c.points.length, 0);
-      const chapters = t.chapters.map(c => {
-        const pts = c.points.map(p => {
-          const ss = p.sources.map(s => {
-            const md = MEDIA[s.type] || MEDIA.site;
-            return `<span class="src" data-t="${esc(s.type)}" style="--mc:${md.color}" title="点击复制：${esc(s.url)}" data-url="${esc(s.url)}">` +
-              `<span class="code">${md.code}</span><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>` +
-              `<span class="lang">${esc(s.lang)}</span></span>`;
-          }).join("");
-          const nosrc = p.sources.length ? "" : `<span class="nosrc">暂无来源</span>`;
-          return `<li class="kp"><div class="kpname">${esc(p.name)}</div><div class="srcs">${ss}${nosrc}</div></li>`;
-        }).join("");
-        return `<details class="chap"><summary><span class="tw">▸</span><span class="cname">${esc(c.name)}</span>` +
-               `<span class="tcount">${c.points.length} 知识点</span></summary><div class="body"><ul class="kps">${pts}</ul></div></details>`;
-      }).join("");
-      return `<details class="topic"><summary><span class="tw">▸</span><span class="tname">${esc(t.name)}</span>` +
-             `<span class="tcount">${t.chapters.length} 章节 · ${chapKps} 知识点</span></summary><div class="body">${chapters}</div></details>`;
-    }).join("");
+    const topics = levelHTML(m.topics || [], "topics");
+    const direct = m.points ? kpsHTML(m.points) : "";
     const exs = (m.exercises || []).map(e => `<li>${esc(e)}</li>`).join("");
     const exBlock = exs ? `<div class="ex"><h4>勘测练习</h4><ol>${exs}</ol></div>` : "";
     return `<details class="mod" id="mod-${mi + 1}"${mi === 0 ? " open" : ""}>` +
       `<summary><span class="tw">▸</span><span class="mno">M${mi + 1}</span><span class="mname">${esc(m.name)}</span>` +
       `<span class="mwhy">${esc(m.why)}</span><span class="rels">${rels}</span><span class="refs">${refs}</span>` +
-      `<span class="mcount">${tps} 主题 · ${srcs} 源</span></summary>` +
-      `<div class="body">${topics}${exBlock}</div></details>`;
+      `<span class="mcount">${kps} 知识点 · ${srcs} 源</span></summary>` +
+      `<div class="body">${topics}${direct}${exBlock}</div></details>`;
   }).join("");
 
   /* 参考图源 */
@@ -741,6 +771,7 @@ function setDepth(level) {
   document.querySelectorAll("details.mod").forEach(d => d.open = level >= 1);
   document.querySelectorAll("details.topic").forEach(d => d.open = level >= 2);
   document.querySelectorAll("details.chap").forEach(d => d.open = level >= 3);
+  document.querySelectorAll("details.sect").forEach(d => d.open = level >= 3);
 }
 
 /* ---------- 媒介筛选：隐藏来源 + 实时计数 + 空点点位提示 ---------- */
@@ -761,8 +792,8 @@ function applyFilter() {
     const all = moduleSources(m);
     const vw = all.filter(s => on.has(s.type)).length;
     el.textContent = full
-      ? `${m.topics.length} 主题 · ${all.length} 源`
-      : `${m.topics.length} 主题 · ${vw}/${all.length} 源`;
+      ? `${countKPs(m)} 知识点 · ${all.length} 源`
+      : `${countKPs(m)} 知识点 · ${vw}/${all.length} 源`;
   });
   const mv = $("#m-vis"), ma = $("#m-all");
   if (mv) mv.textContent = vis;
