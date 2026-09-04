@@ -20,7 +20,13 @@ This project is human-centered and uses AI to strengthen human capability. It se
 npx skills add simba1949/anything-roadmap
 ```
 
-This discovers the four skills in the repository. To install only the personal-path skill into Codex:
+The repository contains four skills; the command above discovers them and opens the selection flow. To install all four skills into Codex:
+
+```bash
+npx skills add simba1949/anything-roadmap --agent codex --global --all
+```
+
+To install only the personal-path skill into Codex:
 
 ```bash
 npx skills add simba1949/anything-roadmap --skill anything-roadmap --agent codex --global --yes

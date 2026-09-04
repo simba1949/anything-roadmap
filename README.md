@@ -20,7 +20,13 @@
 npx skills add simba1949/anything-roadmap
 ```
 
-默认会发现仓库中的四个 skill。只安装个人路线 skill 到 Codex：
+仓库包含四个 skill；上面的命令会发现它们并进入选择流程。安装全部四个 skill 到 Codex：
+
+```bash
+npx skills add simba1949/anything-roadmap --agent codex --global --all
+```
+
+只安装个人路线 skill 到 Codex：
 
 ```bash
 npx skills add simba1949/anything-roadmap --skill anything-roadmap --agent codex --global --yes
