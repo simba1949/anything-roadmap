@@ -28,6 +28,7 @@ description: 为任意领域生成面向所有人的全链路知识地图，覆�
 
 - 优先寻找同领域、仍在有效期内的领域制图 `research.md`。
 - 没有时，若 `anything-research` 可用，以“领域制图模式”调用它：领域边界与核心问题、知识结构与依赖、主要分支、应用与前沿、权威结构来源、分歧与缺口。
+- 联网工具（例如 `agent-reach`）只是被 research 层使用的资料访问路由，不是领域地图的研究入口，也不应直接替代 research dossier。
 - research 不可用时自行完成同等调研，并在 `validation.md` 声明降级。
 - 结构来源优先级：官方知识体系/标准 → 大学培养方案与课程群 → 权威教材目录 → 专业组织知识体 → 多条高质量课程路线的共识。
 
@@ -81,4 +82,3 @@ python scripts/render_domain_map.py <输出目录>/domain-map.json <输出目录
 - `validation.md` 坦白覆盖边界、低置信结构和信息缺口。
 
 交付时列出四个文件的绝对路径。不要替用户生成个人路线；那属于 `anything-roadmap`。
-
