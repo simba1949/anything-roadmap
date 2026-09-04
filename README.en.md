@@ -23,19 +23,19 @@ npx skills add simba1949/anything-roadmap
 The repository contains four skills; the command above discovers them and opens the selection flow. To install all four skills into Codex:
 
 ```bash
-npx skills add simba1949/anything-roadmap --agent codex --global --all
+npx skills add simba1949/anything-roadmap --global --all --agent codex
 ```
 
 To install only the personal-path skill into Codex:
 
 ```bash
-npx skills add simba1949/anything-roadmap --skill anything-roadmap --agent codex --global --yes
+npx skills add simba1949/anything-roadmap --skill anything-roadmap --global --yes --agent codex
 ```
 
 When working from a local checkout (for development or verification):
 
 ```bash
-npx skills add . --skill anything-roadmap --agent codex --global --copy --yes
+npx skills add . --skill anything-roadmap --global --copy --yes --agent codex
 ```
 
 `--global` installs to the user-level skill directory; omit it for a project-local installation. For manual installation, copy the required directories under `skills/` into your agent's skill directory.
