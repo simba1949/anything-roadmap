@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "domain_map_id": "dm-test-domain",
+  "version": "1.0.0",
+  "generated_at": "2026-09-03",
+  "domain": {
+    "name": "测试领域",
+    "definition": "用于验证四层契约的最小领域。",
+    "core_questions": ["怎样验证跨层引用？"],
+    "scope": {
+      "includes": ["公共结构", "能力映射"],
+      "excludes": ["真实领域内容"],
+      "interfaces": ["课程设计"]
+    }
+  },
+  "modules": [
+    {
+      "id": "m-foundation",
+      "type": "module",
+      "title": "基础",
+      "summary": "建立测试基础。",
+      "why": "下游能力依赖这些节点。",
+      "stage": "foundation",
+      "children": [
+        {
+          "id": "kp-structure",
+          "type": "knowledge_point",
+          "title": "结构契约",
+          "definition": "公共地图对下游暴露的稳定字段。",
+          "importance": "保证不同 skill 可以协作。",
+          "problems": ["跨层引用"],
+          "prerequisites": [],
+          "leads_to": ["kp-evidence"],
+          "applications": ["路线生成"],
+          "difficulty": "foundation",
+          "source_ids": ["src-rfc"]
+        }
+      ]
+    },
+    {
+      "id": "m-core",
+      "type": "module",
+      "title": "核心",
+      "summary": "验证学习证据。",
+      "why": "教学运行依赖证据状态。",
+      "stage": "core",
+      "children": [
+        {
+          "id": "kp-evidence",
+          "type": "knowledge_point",
+          "title": "证据状态",
+          "definition": "对学习表现强度的结构化记录。",
+          "importance": "区分内容完成和能力掌握。",
+          "problems": ["掌握判定"],
+          "prerequisites": ["kp-structure"],
+          "leads_to": [],
+          "applications": ["持续教学"],
+          "difficulty": "intermediate",
+          "source_ids": ["src-rfc"]
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "from": "kp-structure",
+      "to": "kp-evidence",
+      "type": "prerequisite",
+      "note": "先有稳定结构，才能记录证据。"
+    }
+  ],
+  "typical_traversal": ["m-foundation", "m-core"],
+  "sources": [
+    {
+      "id": "src-rfc",
+      "title": "RFC 2119",
+      "url": "https://www.rfc-editor.org/rfc/rfc2119",
+      "publisher": "RFC Editor",
+      "tier": "official",
+      "language": "en",
+      "verified_at": "2026-09-03",
+      "supports": ["m-foundation", "m-core"],
+      "note": "测试 fixture 使用的真实稳定 URL。"
+    }
+  ]
+}
+

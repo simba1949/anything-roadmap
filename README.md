@@ -1,15 +1,17 @@
-# anything-research + anything-roadmap
+# anything 系统化教学管线
 
 [English](./README.en.md) | 中文
 
-深度调研 → 系统化学习路线的**两段式管线**，两个独立可用的 agent skill，一次安装全部拥有：
+本项目以人为本，利用 AI 提升人的能力。它把可信研究、领域全貌、个人路线和实际教学拆成四个可独立使用、契约相连的 agent skill：
 
-```
-/anything-research <研究问题>        ← 深度调研引擎
-      ↓ research.md（调研卷宗）
-/anything-roadmap <领域> [背景]      ← 系统化教学大纲
-      ↓ roadmap.md + roadmap.html（+ research.md）
-（未来第三段：系统化教学 skill）
+```text
+/anything-research <问题>             证据、来源、争议、边界
+        ↓
+/anything-domain-map <领域>           面向所有人的全链路知识地图
+        ↓
+/anything-roadmap <学习目标>          透明的个人能力路径和自学课程
+        ↓
+/anything-tutor <开始|继续|复习|状态>  教学、评估、补救、迁移和复习
 ```
 
 ## 安装
@@ -18,37 +20,97 @@
 npx skills add simba1949/anything-roadmap
 ```
 
-一次装齐两个 skill（多 skill 仓库布局）。或手动安装：把 `skills/anything-research/` 与 `skills/anything-roadmap/` 两个文件夹复制到你的 agent 技能目录（如 Claude Code 的 `~/.claude/skills/`）。
+默认会发现仓库中的四个 skill。只安装个人路线 skill 到 Codex：
 
-## anything-research — 深度调研引擎
+```bash
+npx skills add simba1949/anything-roadmap --skill anything-roadmap --agent codex --global --yes
+```
 
-对任意研究问题（选型对比、行业调研、技术尽调、事实核查、背景调查）做多轮迭代调研，**双产物交付**：`report.md`（给人读的研究报告：总览/脉络/洞见/综合结论，`[用途=理解|决策]` 分侧重）+ `research.md`（给 AI 的证据卷宗：证据表/置信度/迭代轨迹，供 anything-roadmap 消费）。深度四标准：
+安装本地检出的仓库（用于开发或验证）：
 
-1. **迭代性**——后轮搜索由前轮阅读产生的新线索驱动，每轮记录迭代轨迹；
-2. **交叉验证**——关键论断 ≥2 个相互独立的来源，孤证显式标注；
-3. **全文级阅读**——基于打开后的全文下结论，不吃搜索摘要片段；
-4. **矛盾呈现**——冲突信息不抹平，"分歧与矛盾"章节让各观点带最强证据对垒。
+```bash
+npx skills add . --skill anything-roadmap --agent codex --global --copy --yes
+```
 
-分层架构：流程引擎（本 skill：何时搜/问什么/何时停）→ 探测复用已装搜索类 skill（如 agent-reach）→ 降级内置 WebSearch/WebFetch。三闸停止：轮数上限 + 收益递减停 + 源预算；三档深度（浅 2 轮 / 中 4 轮 / 深 6 轮）+ `轮数=N` 自定义。
+`--global` 写入用户级 skill 目录；省略它则安装到当前项目。手动安装时，将 `skills/` 下需要的目录复制到 agent 的 skill 目录。
 
-卷宗含：关键发现（论断|置信度|证据表）、分歧与矛盾、信息缺口、迭代轨迹、分级来源清单、教学预埋五问。
+## 四层分别解决什么
 
-## anything-roadmap — 系统化学习路线生成器
+### anything-research
 
-调用 `/anything-roadmap <领域> [一句话背景]`（背景省略即零基础），生成层级自适应大纲（按知识点规模取 2-5 级：模块→主题→章节→节→知识点，中间层可省、不为凑层级造空壳）：
+做多轮深度调研。后轮由前轮全文阅读产生的新线索驱动；关键论断交叉验证；冲突证据不抹平；正式 URL 逐条打开验证。新增“领域制图模式”，为公共知识地图提供边界、结构、依赖、应用和前沿证据。
 
-1. **双路并行调研**：anything-research 卷宗（同领域 7 天内直接复用，没有则教学五问模式现做）与前人学习路线调研**并行执行、互补交叉验证**——不是二选一；两路合成主题树骨架。
-2. **大纲规则**：前人路线为骨（可信度阶梯排序）、按知识内聚拆分、全局地图 + 模块间关联、每模块练习；不含时间表与验收关卡。
-3. **逐条验证的源**：每知识点 ≤3 个源、全份 ~40 封顶，英文权威为骨、中文教学为辅；每个入选链接真实打开验证（活着/对题/权威三问），零幻觉链接，结尾附验证统计。
-4. **产物**：`roadmap.md` + 自包含交互 `roadmap.html`（暗色领地地图：模块为领地、关系为路线，层级自适应折叠下钻、按媒介筛选、锚点跳转，零 CDN、离线可开）。
-5. **方法论导出**：`skills/anything-roadmap/references/playbook.md` 可复制给无工具环境的 AI 使用（含验证降级声明）。
+### anything-domain-map
 
-## 设计原则（两 skill 共用）
+生成不依赖具体学习者的公共领域地图：
 
-- 一站到底：开工后不中途提问；纠正意见 = 全新重跑整份，绝不修补旧稿。
-- 一次性快照：不做增量刷新，源老化就整份重跑。
-- 软依赖：anything-research / agent-reach / web_reader 全部"探测→可用则用"，缺席自动降级，永不变砖。
-- 诚实交付：验证统计、信息缺口、矛盾分歧全部显式呈现。
+```text
+模块 →〔主题〕→〔章节〕→ 知识点
+```
+
+模块和知识点必有，主题/章节按知识内聚动态省略。输出：
+
+```text
+domain-map.json       机器正本
+domain-map.md         可审阅全链路大纲
+domain-map.html       离线知识观测台
+validation.md         来源、覆盖和结构质检
+```
+
+### anything-roadmap
+
+先展示公共地图，再结合毕业任务、基础与约束反推个人能力：
+
+```text
+毕业任务 → 成功条件 → 子任务 → 可验证能力 → 所需知识点 → 前置能力
+```
+
+能力分为核心路径、必要支撑、按需分支和明确延后。昂贵生成前只确认一次学习契约；确认后生成模块化课程、`self-study.md` 和完整地图叠加个人路径的 `roadmap.html`。
+
+### anything-tutor
+
+执行课程并维护私人学习状态。支持“先小试再教学”和“先系统教学再尝试”。掌握按证据推进：
+
+```text
+未诊断 → 识别 → 复述 → 近迁移 → 远迁移 → 延迟保持
+```
+
+反馈区分知识缺口、心智模型、程序执行、条件遗漏、迁移失败以及题目/评分问题。提示越强，证据越弱；课程错误不能记成学习者错误。
+
+## 数据与隐私
+
+公共地图和个人路线是两份正本，在一个界面中呈现：
+
+```text
+domain-map.json + learning-path.json → roadmap.html
+```
+
+私人学习状态保存在独立工作区：
+
+```text
+learner-state.json
+evidence.jsonl
+progress.md
+```
+
+默认只保留结构化证据摘要，不保存完整对话。
+
+## 确定性工具
+
+每层包含可重复执行的验证或渲染脚本：
+
+```bash
+python skills/anything-domain-map/scripts/validate_domain_map.py domain-map.json
+python skills/anything-domain-map/scripts/render_domain_map.py domain-map.json domain-map.html
+
+python skills/anything-roadmap/scripts/validate_learning_path.py learning-path.json domain-map.json
+python skills/anything-roadmap/scripts/render_roadmap.py domain-map.json learning-path.json roadmap.html
+
+python skills/anything-tutor/scripts/state_tool.py init learning-path.json learner-workspace
+python skills/anything-tutor/scripts/state_tool.py validate learner-workspace
+```
+
+完整设计理由、文件契约、验收和迁移记录见 [CONSENSUS.md](./CONSENSUS.md)。
 
 ## License
 

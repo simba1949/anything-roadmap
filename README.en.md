@@ -1,15 +1,17 @@
-# anything-research + anything-roadmap
+# anything: a systematic learning pipeline
 
 English | [中文](./README.md)
 
-A **two-stage pipeline** from deep research to a systematic learning roadmap — two independently usable agent skills, installed together:
+This project is human-centered and uses AI to strengthen human capability. It separates trustworthy research, a public domain map, a personal learning path, and actual tutoring into four independently usable skills with shared contracts:
 
-```
-/anything-research <question>        ← deep-research engine
-      ↓ research.md (research dossier)
-/anything-roadmap <domain> [background]  ← systematic teaching syllabus
-      ↓ roadmap.md + roadmap.html (+ research.md)
-(future stage 3: a systematic-teaching skill)
+```text
+/anything-research <question>          evidence, sources, disputes, boundaries
+        ↓
+/anything-domain-map <domain>          a public end-to-end knowledge map
+        ↓
+/anything-roadmap <learning goal>      a transparent capability path and self-study course
+        ↓
+/anything-tutor <start|resume|review>  teaching, assessment, remediation, transfer, review
 ```
 
 ## Install
@@ -18,37 +20,85 @@ A **two-stage pipeline** from deep research to a systematic learning roadmap —
 npx skills add simba1949/anything-roadmap
 ```
 
-Installs both skills at once (multi-skill repo layout). Or manually: copy the `skills/anything-research/` and `skills/anything-roadmap/` folders into your agent's skills directory (e.g. `~/.claude/skills/` for Claude Code).
+This discovers the four skills in the repository. To install only the personal-path skill into Codex:
 
-## anything-research — deep-research engine
+```bash
+npx skills add simba1949/anything-roadmap --skill anything-roadmap --agent codex --global --yes
+```
 
-Runs multi-round iterative research on any question (technology selection, market research, due diligence, fact-checking, background checks) with **dual artifacts**: `report.md` (the human-readable research report — overview / landscape / insights / synthesis, emphasized by `purpose=understand|decide`) + `research.md` (the AI-facing evidence dossier — evidence tables / confidence / iteration trace, consumed by anything-roadmap). Four depth standards:
+When working from a local checkout (for development or verification):
 
-1. **Iterative** — each later round is driven by new leads surfaced by reading the previous round; every round is logged in an iteration trace;
-2. **Cross-validated** — key claims need ≥2 independent sources; single-source claims are explicitly flagged;
-3. **Full-text reading** — conclusions come from opened full documents, never from search snippets;
-4. **Contradiction-preserving** — conflicting information is never smoothed over; a "Disagreements & Contradictions" section pits each view against its strongest evidence.
+```bash
+npx skills add . --skill anything-roadmap --agent codex --global --copy --yes
+```
 
-Layered architecture: process engine (this skill: when to search, what to ask, when to stop) → probe-and-reuse installed search skills (e.g. agent-reach) → fall back to built-in WebSearch/WebFetch. Three stop gates: round cap + diminishing-returns stop + source budget; three depth presets (light 2 rounds / medium 4 / deep 6) plus `rounds=N` custom.
+`--global` installs to the user-level skill directory; omit it for a project-local installation. For manual installation, copy the required directories under `skills/` into your agent's skill directory.
 
-The dossier contains: key findings (claim | confidence | evidence table), disagreements & contradictions, information gaps, iteration trace, tiered source list, and five teaching-oriented fields.
+## The four layers
 
-## anything-roadmap — systematic learning-roadmap generator
+### anything-research
 
-Invoke `/anything-roadmap <domain> [one-line background]` (defaults to zero-basics) to generate an adaptively-leveled outline (2-5 levels by knowledge-point count: module → topic → chapter → section → knowledge point, intermediate levels omittable, no filler levels):
+Runs iterative deep research. Later rounds are driven by full-text reading from earlier rounds; important claims are cross-validated; contradictions remain visible; every formal URL is opened and checked. Its domain-cartography mode prepares evidence about boundaries, structure, dependencies, applications, and frontiers.
 
-1. **Dossier detection**: reuses a same-domain research.md from the last 7 days if present; otherwise invokes anything-research in teaching-five-questions mode (the dossier becomes the third artifact); falls back to self-conducted prior-path research when neither is available.
-2. **Outline rules**: prior learning paths as the backbone (credibility ladder), split by knowledge cohesion, global map + inter-module relations, exercises per module; no timetables, no assessment gates.
-3. **Verified sources**: ≤3 sources per knowledge point, ~40 per roadmap; English authorities as backbone, Chinese tutorials as scaffolding; every included link is actually opened and verified (alive / on-topic / authoritative) — zero hallucinated links, with a verification summary.
-4. **Artifacts**: `roadmap.md` + self-contained interactive `roadmap.html` (dark territory-map: modules as lands, relations as routes, adaptive-depth drill-down, media filtering, anchor jumps, zero CDN, works offline).
-5. **Methodology export**: `skills/anything-roadmap/references/playbook.md` can be pasted into tool-less AIs (with an explicit verification-degradation notice).
+### anything-domain-map
 
-## Shared design principles
+Builds a learner-independent public map:
 
-- Run to completion: no mid-run questions; corrections = full re-run, never patches.
-- One-shot snapshot: no incremental refresh; regenerate when sources age.
-- Soft dependencies: anything-research / agent-reach / web_reader are all probe-then-use — auto-degrade when absent, never brick.
-- Honest delivery: verification stats, information gaps, and contradictions are all surfaced explicitly.
+```text
+module → [topic] → [chapter] → knowledge point
+```
+
+Modules and knowledge points are required. Topics and chapters appear only when they form meaningful groups. It outputs:
+
+```text
+domain-map.json       machine source of truth
+domain-map.md         reviewable end-to-end outline
+domain-map.html       offline knowledge observatory
+validation.md         source, coverage, and structure checks
+```
+
+### anything-roadmap
+
+Shows the public map first, then derives personal capabilities from a graduation task, background, and constraints:
+
+```text
+graduation task → success conditions → subtasks → observable capabilities
+→ required knowledge → prerequisite capabilities
+```
+
+Capabilities are classified as core, support, on-demand branches, or explicitly deferred. One learning-contract checkpoint precedes expensive generation. The result includes modular course content, `self-study.md`, and a `roadmap.html` that overlays the personal path on the complete map.
+
+### anything-tutor
+
+Executes the course and maintains private learning state. Learners can choose attempt-first or instruction-first teaching. Mastery progresses through evidence:
+
+```text
+unassessed → recognition → recall → near transfer → far transfer → retained
+```
+
+Feedback distinguishes knowledge gaps, misconceptions, procedural failures, omitted conditions, transfer failures, and flawed tasks or grading. Stronger hints produce weaker evidence. A course defect is never recorded as a learner failure.
+
+## Data and privacy
+
+The public map and personal path remain separate sources of truth while appearing in one interface:
+
+```text
+domain-map.json + learning-path.json → roadmap.html
+```
+
+Private learning state lives in a separate workspace:
+
+```text
+learner-state.json
+evidence.jsonl
+progress.md
+```
+
+Only structured evidence summaries are retained by default, not complete conversations.
+
+## Deterministic tooling
+
+The skills include repeatable validators, offline renderers, and a learner-state tool. See each `SKILL.md` for commands and [CONSENSUS.md](./CONSENSUS.md) for the complete design rationale and acceptance criteria.
 
 ## License
 

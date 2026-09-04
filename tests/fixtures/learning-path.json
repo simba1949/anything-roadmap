@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "roadmap_id": "rm-test-path",
+  "version": "1.0.0",
+  "generated_at": "2026-09-03",
+  "domain_map_ref": {
+    "domain_map_id": "dm-test-domain",
+    "version": "1.0.0",
+    "path": "domain-map.json"
+  },
+  "learner": {
+    "learner_id": "learner-test",
+    "background": "了解基本文件格式"
+  },
+  "learning_contract": {
+    "goal_context": "验证四层 skill 契约可以串联",
+    "graduation_task": "独立解释公共地图、个人路线和学习状态如何关联",
+    "constraints": ["使用本地文件"],
+    "completion_evidence": ["无提示复述", "在新 fixture 上完成验证"]
+  },
+  "capabilities": [
+    {
+      "id": "cap-read-contract",
+      "title": "读取跨层契约",
+      "statement": "面对一组新的 JSON 文件，能解释公共节点和个人能力如何关联。",
+      "role": "support",
+      "selection_reason": "它是完成毕业任务的必要前置。",
+      "knowledge_links": [
+        {"knowledge_point_id": "kp-structure", "role": "conceptual_basis"}
+      ],
+      "prerequisite_capability_ids": [],
+      "strategy": "mental_model",
+      "verification": "exact",
+      "lesson_file": "content/cap-read-contract.md"
+    },
+    {
+      "id": "cap-validate-evidence",
+      "title": "验证学习证据",
+      "statement": "面对新的学习事件，能判断其证据等级并说明依据。",
+      "role": "core",
+      "selection_reason": "直接证明能完成毕业任务。",
+      "knowledge_links": [
+        {"knowledge_point_id": "kp-evidence", "role": "judgment_basis"}
+      ],
+      "prerequisite_capability_ids": ["cap-read-contract"],
+      "strategy": "judgment",
+      "verification": "rubric",
+      "lesson_file": "content/cap-validate-evidence.md",
+      "mastery_requirement": {
+        "minimum_level_to_advance": "near_transfer",
+        "unassisted_required": true,
+        "evidence_count": 2
+      },
+      "diagnostic": {
+        "task_id": "diag-evidence",
+        "branching_value": "区分字段识别与证据判断"
+      },
+      "assessment": {
+        "seed_task_ids": ["task-evidence-01"],
+        "rubric_id": "rubric-evidence"
+      },
+      "remediation": {
+        "likely_errors": ["confuses-completion-with-mastery"],
+        "branch_capability_ids": []
+      }
+    }
+  ],
+  "recommended_sequence": ["cap-read-contract", "cap-validate-evidence"],
+  "projects": [
+    {
+      "id": "project-graduation",
+      "type": "graduation",
+      "title": "验证陌生 fixture",
+      "capability_ids": ["cap-read-contract", "cap-validate-evidence"],
+      "novelty_constraints": ["使用未见过的数据"],
+      "hint_policy": "limited",
+      "rubric_id": "rubric-graduation"
+    }
+  ],
+  "sources": []
+}
+

@@ -1,0 +1,15 @@
+{
+  "event_id": "ev-test-001",
+  "timestamp": "2026-09-03T12:00:00+08:00",
+  "capability_id": "cap-read-contract",
+  "task_id": "task-contract-01",
+  "evidence_type": "recall",
+  "result": "pass",
+  "resulting_level": "recall",
+  "hint_level": "none",
+  "error_type": null,
+  "confidence": "high",
+  "summary": "能够无提示说明公共地图与个人路线的区别。",
+  "next_review_at": "2026-09-06T12:00:00+08:00",
+  "artifact_ref": null
+}

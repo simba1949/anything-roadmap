@@ -77,4 +77,4 @@
 
 ## 维护约定
 
-本文件是 report.md 的结构正本。变更须同步：`SKILL.md` 成稿一节、`CONSENSUS.md` §13。无工具版投影在 `dossier-template.md` 文末提示词（其输出即报告体）。
+本文件是 report.md 的结构正本。变更须同步 `SKILL.md` 的成稿约定；领域制图模式默认只交付证据卷宗，不强制生成本报告。

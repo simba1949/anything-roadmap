@@ -1,87 +1,128 @@
 ---
 name: anything-roadmap
-description: 为任意领域生成系统化学习路线（层级自适应 2-5 级大纲）。先双路并行调研（anything-research 卷宗 + 前人学习路线，互补合成）作骨架，再为每个知识点搜索并逐条验证权威源（官方文档/博客/视频/网站，英文权威为骨、中文教学为辅），产出 research.md + roadmap.md + 自包含交互 HTML（roadmap.html）三件套。当用户想为某领域制定学习大纲、学习路线、系统学习规划、入门路线、curriculum、roadmap、syllabus、learning path 时使用。不做：把已有书籍/课程蒸馏成 skill；生成人物思维 skill；单独的深度调研（那是 anything-research）。
+description: 基于公共 domain-map、学习目标、基础与约束，为具体学习者生成透明的个人能力路径和可独立学习的课程包。产出学习契约、learning-path.json、模块化内容、self-study.md、roadmap.md/html 与验证报告。当用户要为自己制定学习路线、课程、入门或进阶计划时使用；面向所有人的完整领域大纲改用 anything-domain-map。
 ---
 
-# anything-roadmap — 任意领域学习路线生成器
+# anything-roadmap
 
-调用：`/anything-roadmap <领域> [一句话背景]`。背景省略即按零基础制定。
-
-## 铁律（违反任何一条即失败）
-
-1. **零幻觉链接**：进入成品的每一个 URL 都必须真实打开验证过——链接活着、内容对题、出处确实权威。验证不过就不放，宁缺毋滥。
-2. **调研为骨（双路并行）**：主题树来自深度调研的合成——anything-research 卷宗（若有）与前人学习路线调研**并行执行、互补交叉验证，不是二选一**，更不是凭模型记忆现编。可信度阶梯：官方路线 > 大学课表/知名课程目录 > 高星 awesome-list > 高信噪比个人路线文 > 社区讨论共识。两路合计搜不到 ≥2 条可信路线 → 降级为"官方文档目录结构为骨"，并在成品的生成说明中显式声明。
-3. **一站到底**：消歧之后不再向用户提问。用户事后给纠正意见 = 带纠正意见全新重跑全流程，生成新日期目录，绝不修补旧稿。
-4. **预算**：每知识点 ≤3 个源、全份封顶 ~40（同一 URL 可挂多个知识点，只占 1 个名额）。超预算时收窄主题树，不是放宽上限。
-
-## 流程
-
-### 0. 消歧（最多两问，问完不再问）
-- 领域一句话消歧，如"支付"→支付系统开发还是支付业务？用户答"都行"→ 取最主流解释，并把该假设写进成品"生成说明"。
-- 若 args 未带背景，可再问一句"有相关基础吗？"；跳过或含糊 → 零基础。
-
-### 1. 调研为骨（双路并行，互补合成——不是二选一）
-- **深度调研线（增强项）**：检测当前目录存在 `<领域>-research-<YYYYMMDD>/research.md`（同领域、≤7 天，多个取最新）→ 复用并在生成说明声明"复用 X 日卷宗（路径）"；无卷宗且装有 anything-research → 以**教学五问模式**现做，research.md 落入本次输出目录作为第三产物；两者皆无 → 此线缺席（生成说明声明）。
-- **前人路线线（恒常执行，不可省）**：中英文都发查询（`<domain> roadmap`、`how to learn <domain>`、`<domain> syllabus site:.edu`、`awesome <domain>`、`<领域> 学习路线`、`<领域> 入门 知乎/掘金` 经 Exa 间接捞），每条候选打开确认真实存在且内容对口，记录 tier/标题/URL/一句话点评。官方文档站若提供 `llms.txt`（机器可读全站索引），优先抓它当结构骨架。**卷宗 §7.2 的路径清单是本线的起点与交叉验证对象**——两路各自核验、合并去重。
-- 主题树骨架 = 两路合成；两路合计搜不到 ≥2 条可信路线 → 降级为"官方文档目录结构为骨"并显式声明。前人路线线记录并入 roadmap.md 附录 A。
-
-### 2. 探测搜索通道（先复用已装 skill，再内置）
-- 先看环境里已安装的搜索类 skill（当前为 agent-reach），跑 `agent-reach doctor --json` 确认哪些通道今天真的活着，按活着的通道路由。
-- 搜索类 skill 不在或通道全死 → 内置 WebSearch/WebFetch。编程库/框架类领域且 context7 可用 → 官方文档优先走 context7（按"可用时用"处理，不硬依赖）。
-
-| 任务 | 首选 | 降级 |
-|---|---|---|
-| 前人路线 / 官方文档 / 博客 / 网站 / 社区讨论（间接） | Exa：`mcporter call exa.web_search_exa query="…" numResults=5` | WebSearch |
-| awesome-list / GitHub 仓库 | `gh search repos "…" --sort stars --limit 10`（未认证降级 GitHub REST API） | WebSearch |
-| YouTube 视频 | `yt-dlp --flat-playlist --print "%(title)s\|%(channel)s\|%(view_count)s\|%(url)s" "ytsearch5:…"` | WebSearch |
-| B站视频 | `PYTHONUTF8=1 bili search "…" --type video -n 8`（防 Windows GBK 乱码） | WebSearch |
-| 打开验证链接 | web_reader MCP → Jina（`curl r.jina.ai/<URL>`）→ WebFetch | — |
-
-### 3. 合成主题树
-- 骨架优先取两路调研合成（卷宗"教学预埋 §7.2 公认学习路径" 与 前人路线线结果合并去重），按知识内聚分层；模块编号 M1..Mn 体现学习顺序。
-- **层级自适应（2-5 级，按知识点规模定基准）**：模块 → 主题 → 章节 → 节 → 知识点，任一中间层可省略——全领域知识点 ≤12 用二级（模块→知识点）、13-24 三级、25-60 四级（默认）、>60 且单层内知识点密集用五级（加"节"）；同一份大纲内不同模块可混用深度（小模块拍扁、大模块加深）；**中间层必须聚合 ≥2 个有意义的子节点，不为凑层级造空壳层**。
-- 每模块记 why（为何这么切）与 refs（支撑它的前人路线序号）；记模块间关联（from/to/note）——卷宗 §7.5 难度与前置依赖是关联的重要来源。
-- 控制规模：知识点总数要装得下"每点 ≤3 源、全份 ~40"的预算。
-
-### 4. 搜源
-每个知识点按阶梯选 ≤3 个候选：官方文档 > 权威书/课 > 深度博客 > 视频。卷宗"§7.3 权威资源"里的条目优先入选（仍需通过验证）。英文权威为骨、中文教学为辅（视频与入门讲解优先 B站/知乎/掘金）。媒介混搭（doc/blog/video/site）。
-
-### 5. 逐条验证
-- 每个候选 URL 按路由表最后一行三通道接力打开，三问全过才入选：活着？对题？权威？否则剔除并计数。
-- curl/直连失败 ≠ 死链：本机网络抖动常见，先换通道（本地代理 → web_reader → Jina）重试再判死。
-- 候选量大时可用并行子代理加速。全程记 found / passed / dropped。
-
-### 6. 成稿
-输出目录 `./<领域>-roadmap-<YYYYMMDD>/`：
-- **roadmap.md**：按下方骨架写全内容，正文中文、来源标题保留原文。
-- **roadmap.html**：复制本 skill 的 `references/template.html`，只替换 `<script>` 内 `DATA-START` 与 `DATA-END` 两个注释标记之间的 DATA 对象，其余不动。生成后自检：`grep -E 'src="http|link[^>]*href="http' roadmap.html` 必须为空（零 CDN 禁令；DATA 区内的来源链接是 <a> 不带 src，不算违例）。
-- **research.md**：仅当本次通过 anything-research 生成了卷宗时存在（复用旧卷宗时不复制进本目录，在 roadmap.md 附录 B 引用其路径）。
-- 若为纠正重跑：把用户纠正意见当作本次的硬约束，从第 0 步重新执行全部流程。
-
-**roadmap.md 骨架**：
-
-```
-# <领域> 学习路线
-> 日期 | 模式（前人路线为骨 / 官方文档回退）| 调研来源（卷宗路径 + 前人路线线，双路并行）| 受众 | 验证：搜到 X / 通过 Y / 剔除 Z
-
-## 0 全局地图
-### 领域面貌 / 模块拆分依据 / 模块间关联（M1 ⇄ M2：…）
-
-## M1 <模块名>（why；参考路线 [R1]）
-### <主题>   ← 中间层按规模取舍：可省（二级）/可加"节"（五级）
-#### <章节>
-- **<知识点>** — [DOC·EN Title](url) · [VID·中 标题](url) …
-### 练习
-1. …
-
-## 附录 A 前人路线（tier · [标题](url) · 一句话点评）
-## 附录 B 生成说明（模式、调研来源、假设、验证统计、纠错=整份重跑）
-```
-
-### 7. 交付
-生成结束必须在对话中明确列出全部产物的完整绝对路径（roadmap.md、roadmap.html，以及本次生成的 research.md），并把文件发送给用户。
+为具体学习者把公共知识地图编译成个人能力路径和自学课程。AI 可以优化路径，但必须让学习者看见全局、取舍和调整理由。
 
 ## 边界
-- 单独的深度调研/调研报告 → anything-research（本 skill 的调研前端，产出卷宗）。
-- 蒸馏已有书籍/课程成 skill → cangjie-skill；人物思维 skill → huashu-nuwa。
-- 无工具环境（网页版 Claude、ChatGPT 等）的方法论导出版：`references/playbook.md`，可整段复制给对方 AI 使用，其开头已含验证降级声明。
+
+- 要领域全貌、全链路大纲、知识体系，不涉及个人目标：使用 `anything-domain-map`。
+- 要实际上课、复习、评估或继续上次学习：使用 `anything-tutor`。
+- 本 skill 负责确认学习契约、生成个人路线与课程包，不把阅读进度当成掌握。
+
+## 不可违背
+
+1. **毕业任务驱动**：从真实任务的成功条件反推能力，不把知识点标题机械改写成“理解”。
+2. **全局始终可见**：所有个人路线必须引用完整 `domain-map`；被延后内容留在地图中并说明原因。
+3. **能力可观察**：能力节点写成“学习者能在什么条件下完成什么行为”。
+4. **二八有依据**：先判断目标必要性，再按依赖杠杆、使用频率和犯错代价排序，记录每个选择理由。
+5. **一个高价值确认点**：生成昂贵课程前让用户确认学习契约；确认后不中途逐模块审批。
+6. **教学闭环完整**：每项核心能力都有诊断、教学、练习、评分、错误和补救契约。
+7. **来源不是教学**：综合验证过的来源形成直接可学的内容；链接只承担证据和拓展作用。
+8. **路线正本不可被 tutor 静默改写**：运行时偏移写入 learner state，重大目标变化才重生成 roadmap。
+
+## 1. 获取公共地图
+
+接受显式 `domain-map.json` 路径；否则在当前工作区寻找同领域最新兼容版本。若不存在且 `anything-domain-map` 可用，调用它生成。无法获得正式地图时可以生成“待验证草案”，但必须显式降级，不能假装存在公共正本。
+
+开始个性化前，先向学习者展示领域模块、主要关系和当前地图边界。
+
+## 2. 建立学习契约
+
+渐进获得：
+
+- 目标情境和希望解决的真实问题；
+- 可观察的毕业任务；
+- 基础自述；
+- 时间、工具、语言、环境等约束；
+- 完成证据与不可接受的失败。
+
+用少量有分叉价值的题目探测起点。不会改变路线的问题不要问。基础自述和一次答对只能作为弱证据。
+
+按 [references/learning-contract-template.md](references/learning-contract-template.md) 生成 `learning-contract.md` 草案，展示：毕业任务、核心路径摘要、延后项、假设、约束和完成证据。等待用户确认一次；修改后再次确认。确认前不批量生成教学内容。
+
+## 3. 从任务反推能力
+
+```text
+毕业任务 → 成功条件 → 子任务 → 可验证能力 → 所需知识点 → 前置能力
+```
+
+阅读 [references/learning-path-schema.md](references/learning-path-schema.md) 创建 `learning-path.json`。
+
+- 能力与知识点允许多对多；
+- 记录知识点在能力中的作用：理解基础、操作方法、判断依据、约束条件或拓展背景；
+- `prerequisite_capability_ids` 组成无环图；
+- 诊断通过的能力仍保留，标记初始证据并安排低频复测，不从地图消失；
+- 每项能力标注教学策略和验证方式。
+
+## 4. 选择透明路径
+
+把能力分为：
+
+- `core`：直接贡献毕业任务；
+- `support`：缺失会阻断核心；
+- `branch`：特定错误、兴趣或情境下进入；
+- `deferred`：属于完整地图，但当前回报较低。
+
+时间不足时缩小目标或推迟分支，不降低核心能力的证据标准。为每个能力写 `selection_reason`；deferred 也必须写延后理由。
+
+## 5. 生成课程内容
+
+核心路径和高概率补救支线提前生成，长尾内容按需扩展。只为入选能力搜索教学型材料，所有 URL 实际打开验证；不要重复 domain-map 的全领域结构调研。
+
+阅读 [references/course-unit-template.md](references/course-unit-template.md)。每个核心能力至少包含：能力陈述、前置诊断、心智模型、正例/反例、首次尝试、主动回忆、近迁移任务、答案或量规、错误分类、补救支线、来源。
+
+允许两种学习顺序：默认建议小型尝试后精准教学；用户可以先系统讲授再尝试。任何讲授、观看或跟做结果都不能直接标记为掌握。
+
+课程保存种子任务和变式约束。变式必须保持被测能力与判定条件不变，不能只换数字后声称完成远迁移。
+
+## 6. 产物
+
+输出目录：`./<goal>-roadmap-<version>/`
+
+```text
+learning-contract.md
+learning-path.json
+content/
+self-study.md
+roadmap.md
+roadmap.html
+validation.md
+```
+
+- `content/` 是模块化教学内容正本；
+- `self-study.md` 是按 [references/self-study-template.md](references/self-study-template.md) 生成、可脱离 tutor 的合订版；
+- `roadmap.md` 是按 [references/roadmap-template.md](references/roadmap-template.md) 生成的个人路线与取舍文字视图；
+- `roadmap.html` 只负责观看大纲、定位、关系和下钻，不负责教学、判分、进度或复习；
+- `validation.md` 使用 [references/validation-template.md](references/validation-template.md)。
+
+用公共地图和个人路径渲染单文件 HTML：
+
+```bash
+python scripts/render_roadmap.py path/to/domain-map.json <输出目录>/learning-path.json <输出目录>/roadmap.html
+```
+
+## 7. 验证
+
+```bash
+python scripts/validate_learning_path.py <输出目录>/learning-path.json path/to/domain-map.json
+```
+
+修复所有 error；解释或修复 warning。再执行独立评价轮，用初学、部分掌握和高水平三种模拟学习者攻击题目歧义、泄题、条件不足、错误答案、量规失真和伪迁移，把结果写入 `validation.md`。
+
+最终确认：
+
+- 每项 core 能力可回溯到毕业任务和知识点；
+- 能力依赖无环且推荐顺序尊重依赖；
+- core/support/branch/deferred 均有理由；
+- 每项 core 有完整教学闭环和可执行评价；
+- 静态课程无需 tutor 才能理解；
+- HTML 同时显示完整地图和个人路线，零 CDN、离线可用；
+- 初始 learner state 只标记 `unassessed` 或真实诊断证据，不虚构掌握。
+
+若 `anything-tutor` 可用，用其状态工具在独立学习者工作区初始化状态；不要把私人状态写进可共享课程目录。
+
+交付时列出所有产物和引用的 domain-map 绝对路径。

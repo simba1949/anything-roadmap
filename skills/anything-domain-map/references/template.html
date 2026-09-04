@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>知识观测台</title>
+  <style>
+    :root{
+      --bg:#0b0e10;--panel:#11161a;--panel-2:#161c20;--line:#293238;
+      --text:#edf2e8;--muted:#9aa69b;--faint:#707b73;--accent:#b7e46d;
+      --accent-ink:#17200b;--danger:#e58a72;--radius:12px;--toolbar:64px;
+      font-family:"Segoe UI","Noto Sans SC",system-ui,sans-serif
+    }
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);min-height:100dvh}
+    body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.3;background-image:linear-gradient(rgb(183 228 109/.035) 1px,transparent 1px),linear-gradient(90deg,rgb(183 228 109/.035) 1px,transparent 1px);background-size:48px 48px;mask-image:linear-gradient(to bottom,#000,transparent 72%)}
+    button,input,select{font:inherit}button,select,input{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:8px}
+    button{cursor:pointer}button:hover,button:focus-visible,select:focus-visible,input:focus-visible{border-color:var(--accent);outline:2px solid transparent}
+    a{color:var(--accent)}.shell{width:min(1440px,100%);margin:auto;padding:0 24px 72px;position:relative}
+    header{padding:42px 0 26px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:32px;align-items:end}
+    .kicker{font:600 11px/1.4 ui-monospace,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+    h1{font-size:clamp(34px,6vw,76px);line-height:1;margin:10px 0 14px;letter-spacing:-.045em;max-width:900px}
+    .definition{max-width:72ch;color:var(--muted);font-size:17px;line-height:1.7;margin:0}.metrics{display:grid;grid-template-columns:repeat(2,minmax(110px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+    .metric{background:var(--panel);padding:14px 16px}.metric b{display:block;font:650 24px/1 ui-monospace,Consolas,monospace}.metric span{display:block;color:var(--faint);font-size:12px;margin-top:8px}
+    .toolbar{position:sticky;top:0;z-index:20;min-height:var(--toolbar);display:flex;align-items:center;gap:10px;padding:10px 0;background:rgb(11 14 16/.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+    .toolbar input{min-width:220px;flex:1;padding:10px 12px}.toolbar select,.toolbar button{padding:10px 12px}.toolbar button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+    .status{font:12px/1.4 ui-monospace,Consolas,monospace;color:var(--muted);white-space:nowrap}
+    .layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:28px;padding-top:28px}.rail{position:sticky;top:84px;align-self:start;max-height:calc(100dvh - 104px);overflow:auto;border-right:1px solid var(--line);padding-right:18px}
+    .rail h2,.relations h2{font-size:13px;color:var(--muted);font-weight:600}.module-nav{display:grid;gap:6px}.module-nav button{text-align:left;padding:11px 12px;border-color:transparent;background:transparent;color:var(--muted)}.module-nav button:hover,.module-nav button.active{color:var(--text);background:var(--panel);border-color:var(--line)}
+    .module-nav small{display:block;color:var(--faint);margin-top:4px}.stage{font:600 10px/1 ui-monospace,Consolas,monospace;color:var(--accent);text-transform:uppercase}
+    main{min-width:0}.orientation{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-bottom:26px}.scope,.questions{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(145deg,var(--panel),rgb(17 22 26/.55));padding:20px}
+    .orientation h2{margin:0 0 14px;font-size:18px}.orientation ul{margin:0;padding-left:20px;color:var(--muted);line-height:1.7}.scope-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.scope-grid h3{font-size:12px;color:var(--faint);margin:0 0 8px;text-transform:uppercase;letter-spacing:.08em}
+    .module{scroll-margin-top:86px;border-top:1px solid var(--line);padding:30px 0}.module-head{display:grid;grid-template-columns:1fr minmax(220px,.7fr);gap:24px;margin-bottom:20px}.module h2{font-size:clamp(25px,4vw,42px);margin:6px 0 10px;letter-spacing:-.025em}.module-summary,.module-why{color:var(--muted);line-height:1.65;margin:0}.module-why{border-left:2px solid var(--accent);padding-left:14px;align-self:end}
+    .tree{display:grid;gap:10px}.branch{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);overflow:hidden}.branch summary{list-style:none;padding:15px 17px;cursor:pointer;display:flex;align-items:center;gap:10px}.branch summary::-webkit-details-marker{display:none}.branch summary:before{content:"+";width:20px;height:20px;display:grid;place-items:center;color:var(--accent);font:16px/1 ui-monospace,monospace}.branch[open]>summary:before{content:"−"}.branch-title{font-weight:650}.branch-type{margin-left:auto;font:10px/1 ui-monospace,monospace;color:var(--faint);text-transform:uppercase}.branch-body{padding:0 12px 12px 34px;display:grid;gap:9px}
+    .point{border-left:1px solid var(--line);padding:14px 14px 14px 18px;background:var(--panel-2);border-radius:0 9px 9px 0}.point.match{border-left-color:var(--accent);background:rgb(183 228 109/.08)}.point h3{font-size:16px;margin:0 0 7px;display:flex;gap:8px;align-items:baseline}.point-id{font:10px/1 ui-monospace,monospace;color:var(--faint)}.point p{margin:5px 0;color:var(--muted);line-height:1.55}.point dl{display:grid;grid-template-columns:max-content 1fr;gap:5px 12px;margin:10px 0 0;font-size:13px}.point dt{color:var(--faint)}.point dd{margin:0;color:var(--muted)}
+    .relations{margin-top:28px;border:1px solid var(--line);border-radius:var(--radius);padding:18px;background:var(--panel)}.relation-list{display:grid;gap:8px}.relation{display:grid;grid-template-columns:minmax(120px,1fr) auto minmax(120px,1fr) 2fr;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}.relation:last-child{border-bottom:0}.relation .kind{color:var(--accent);font:10px/1 ui-monospace,monospace;text-transform:uppercase}.relation .note{color:var(--muted)}
+    .empty{padding:28px;color:var(--muted);border:1px dashed var(--line);border-radius:var(--radius)}.hidden{display:none!important}.highlight{animation:focus-in .7s ease-out}@keyframes focus-in{from{background:rgb(183 228 109/.2)}to{background:var(--panel-2)}}
+    footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);color:var(--faint);font-size:12px;display:flex;justify-content:space-between;gap:20px}
+    @media(max-width:820px){.shell{padding-inline:16px}header{grid-template-columns:1fr}.metrics{width:100%}.layout{grid-template-columns:1fr}.rail{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--line);padding:0 0 14px}.module-nav{display:flex;overflow:auto}.module-nav button{min-width:190px}.orientation,.module-head{grid-template-columns:1fr}.toolbar{overflow:auto}.toolbar input{min-width:170px}.relation{grid-template-columns:1fr auto 1fr}.relation .note{grid-column:1/-1}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.highlight{animation:none}}
+    @media print{body{background:#fff;color:#111}body:before,.toolbar,.rail{display:none}.shell{width:100%;padding:0}.layout{display:block}.branch,.scope,.questions,.relations{background:#fff;border-color:#bbb}.branch-body{display:grid!important}.branch:not([open])>.branch-body{display:grid}.point{background:#fff}.point p,.module-summary,.module-why,.orientation ul,.relation .note{color:#333}a{color:#111}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div><div class="kicker">Knowledge observatory</div><h1 id="domainName">知识地图</h1><p class="definition" id="domainDefinition"></p></div>
+      <div class="metrics" aria-label="地图统计"><div class="metric"><b id="moduleCount">0</b><span>模块</span></div><div class="metric"><b id="pointCount">0</b><span>知识点</span></div><div class="metric"><b id="relationCount">0</b><span>关系</span></div><div class="metric"><b id="sourceCount">0</b><span>来源</span></div></div>
+    </header>
+    <div class="toolbar" aria-label="地图工具">
+      <input id="search" type="search" placeholder="搜索知识点、问题或应用" aria-label="搜索知识地图">
+      <select id="depth" aria-label="展开深度"><option value="module">模块</option><option value="topic">主题</option><option value="all">全部</option></select>
+      <button id="relationsToggle" type="button" aria-pressed="true">关系层</button>
+      <span class="status" id="status">准备就绪</span>
+    </div>
+    <div class="layout">
+      <aside class="rail"><h2>观测区域</h2><nav class="module-nav" id="moduleNav"></nav></aside>
+      <main>
+        <section class="orientation" id="orientation"></section>
+        <div id="modules"></div>
+        <section class="relations" id="relations"><h2>跨区域关系</h2><div class="relation-list" id="relationList"></div></section>
+      </main>
+    </div>
+    <footer><span id="mapIdentity"></span><span>公共知识地图，不代表个人学习路线</span></footer>
+  </div>
+  <script>
+  /* DOMAIN_MAP_DATA_START */
+  const DOMAIN_MAP = {
+    "schema_version":"1.0","domain_map_id":"dm-example","version":"1.0.0","generated_at":"2026-09-03",
+    "domain":{"name":"示例领域","definition":"用于展示知识观测台的数据结构。","core_questions":["这个领域解决什么问题？"],"scope":{"includes":["基础与核心"],"excludes":["无限细节"],"interfaces":["相邻领域"]}},
+    "modules":[{"id":"m-foundation","type":"module","title":"基础","summary":"建立共同语言。","why":"后续知识依赖这些定义。","stage":"foundation","children":[{"id":"t-core","type":"topic","title":"核心概念","summary":"一组相互关联的概念。","children":[{"id":"kp-one","type":"knowledge_point","title":"概念一","definition":"第一个示例概念。","importance":"说明结构化知识点。","problems":["问题一"],"prerequisites":[],"leads_to":["kp-two"],"applications":["应用一"],"difficulty":"foundation","source_ids":["src-one"]},{"id":"kp-two","type":"knowledge_point","title":"概念二","definition":"第二个示例概念。","importance":"展示知识点关系。","problems":["问题二"],"prerequisites":["kp-one"],"leads_to":[],"applications":["应用二"],"difficulty":"core","source_ids":["src-one"]}]}]}],
+    "relationships":[{"from":"kp-one","to":"kp-two","type":"prerequisite","note":"概念二依赖概念一。"}],"typical_traversal":["m-foundation"],
+    "sources":[{"id":"src-one","title":"RFC 2119","url":"https://www.rfc-editor.org/rfc/rfc2119","publisher":"RFC Editor","tier":"official","language":"en","verified_at":"2026-09-03","supports":["m-foundation"],"note":"模板示例来源。"}]
+  };
+  /* DOMAIN_MAP_DATA_END */
+  const $=s=>document.querySelector(s);const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const nodes=new Map();let points=0;
+  function indexNode(n){nodes.set(n.id,n);if(n.type==="knowledge_point")points++;(n.children||[]).forEach(indexNode)}
+  (DOMAIN_MAP.modules||[]).forEach(indexNode);
+  function list(v){return Array.isArray(v)&&v.length?v.map(x=>`<li>${esc(x)}</li>`).join(""):"<li>未声明</li>"}
+  function orientation(){const d=DOMAIN_MAP.domain||{},s=d.scope||{};return `<article class="scope"><h2>边界</h2><div class="scope-grid"><div><h3>包含</h3><ul>${list(s.includes)}</ul></div><div><h3>排除</h3><ul>${list(s.excludes)}</ul></div><div><h3>相邻接口</h3><ul>${list(s.interfaces)}</ul></div><div><h3>典型遍历</h3><ul>${list((DOMAIN_MAP.typical_traversal||[]).map(id=>nodes.get(id)?.title||id))}</ul></div></div></article><article class="questions"><h2>核心问题</h2><ul>${list(d.core_questions)}</ul></article>`}
+  function point(n){return `<article class="point" data-id="${esc(n.id)}" data-search="${esc([n.title,n.definition,...(n.problems||[]),...(n.applications||[])].join(" ").toLowerCase())}"><h3>${esc(n.title)} <span class="point-id">${esc(n.id)}</span></h3><p>${esc(n.definition)}</p><p>${esc(n.importance)}</p><dl><dt>解决</dt><dd>${esc((n.problems||[]).join("；")||"未声明")}</dd><dt>应用</dt><dd>${esc((n.applications||[]).join("；")||"未声明")}</dd><dt>前置</dt><dd>${esc((n.prerequisites||[]).map(id=>nodes.get(id)?.title||id).join("；")||"无")}</dd><dt>难度</dt><dd>${esc(n.difficulty||"未标注")}</dd></dl></article>`}
+  function branch(n){if(n.type==="knowledge_point")return point(n);return `<details class="branch" data-type="${esc(n.type)}" data-id="${esc(n.id)}"><summary><span class="branch-title">${esc(n.title)}</span><span class="branch-type">${esc(n.type)}</span></summary><div class="branch-body">${(n.children||[]).map(branch).join("")}</div></details>`}
+  function module(n,i){return `<section class="module" id="${esc(n.id)}"><div class="module-head"><div><span class="stage">${esc(n.stage||"module")}</span><h2>${esc(n.title)}</h2><p class="module-summary">${esc(n.summary)}</p></div><p class="module-why">${esc(n.why)}</p></div><div class="tree">${(n.children||[]).map(branch).join("")}</div></section>`}
+  function renderRelations(){const items=DOMAIN_MAP.relationships||[];$("#relationList").innerHTML=items.length?items.map(r=>`<button class="relation" type="button" data-target="${esc(r.to)}"><span>${esc(nodes.get(r.from)?.title||r.from)}</span><span class="kind">${esc(r.type)}</span><span>${esc(nodes.get(r.to)?.title||r.to)}</span><span class="note">${esc(r.note)}</span></button>`).join(""):`<div class="empty">本地图没有声明跨节点关系。</div>`}
+  function setDepth(mode){document.querySelectorAll("details.branch").forEach(d=>{const t=d.dataset.type;d.open=mode==="all"||(mode==="topic"&&t==="topic")});$("#status").textContent=mode==="all"?"全部知识点已展开":mode==="topic"?"展开到主题":"模块总览"}
+  function jump(id){const el=document.querySelector(`[data-id="${CSS.escape(id)}"]`)||document.getElementById(id);if(!el)return;let p=el.parentElement;while(p){if(p.tagName==="DETAILS")p.open=true;p=p.parentElement}el.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});el.classList.remove("highlight");void el.offsetWidth;el.classList.add("highlight")}
+  $("#domainName").textContent=DOMAIN_MAP.domain?.name||"未命名领域";$("#domainDefinition").textContent=DOMAIN_MAP.domain?.definition||"未提供领域定义";$("#moduleCount").textContent=(DOMAIN_MAP.modules||[]).length;$("#pointCount").textContent=points;$("#relationCount").textContent=(DOMAIN_MAP.relationships||[]).length;$("#sourceCount").textContent=(DOMAIN_MAP.sources||[]).length;$("#mapIdentity").textContent=`${DOMAIN_MAP.domain_map_id} @ ${DOMAIN_MAP.version} / ${DOMAIN_MAP.generated_at}`;
+  $("#orientation").innerHTML=orientation();$("#modules").innerHTML=(DOMAIN_MAP.modules||[]).map(module).join("")||`<div class="empty">地图尚无模块。</div>`;$("#moduleNav").innerHTML=(DOMAIN_MAP.modules||[]).map((m,i)=>`<button type="button" data-target="${esc(m.id)}"><span class="stage">${esc(m.stage||"module")}</span>${esc(m.title)}<small>${esc(m.summary)}</small></button>`).join("");renderRelations();setDepth("module");
+  document.addEventListener("click",e=>{const b=e.target.closest("[data-target]");if(b)jump(b.dataset.target)});$("#depth").addEventListener("change",e=>setDepth(e.target.value));$("#relationsToggle").addEventListener("click",e=>{const on=e.currentTarget.getAttribute("aria-pressed")==="true";e.currentTarget.setAttribute("aria-pressed",String(!on));$("#relations").classList.toggle("hidden",on)});$("#search").addEventListener("input",e=>{const q=e.target.value.trim().toLowerCase();let shown=0;document.querySelectorAll(".point").forEach(p=>{const hit=!q||p.dataset.search.includes(q);p.classList.toggle("hidden",!hit);p.classList.toggle("match",!!q&&hit);if(hit){shown++;let x=p.parentElement;while(x){if(x.tagName==="DETAILS")x.open=true;x=x.parentElement}}});$("#status").textContent=q?`匹配 ${shown} 个知识点`:`共 ${points} 个知识点`});
+  </script>
+</body>
+</html>
