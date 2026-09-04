@@ -2,7 +2,7 @@
 
 > **定位**：anything-research 的**主交付物，给人读**。从证据卷宗（research.md）提炼而来——每条论断都能按卷宗编号回溯证据；密度、表格、置信度标记留给卷宗，报告只负责让读者读懂并知道该关注什么。
 >
-> 生成时复制本结构到 `<主题>-research-<YYYYMMDD>/report.md` 并填实。
+> 生成时复制本结构到 `<project-slug>-learning/anything-research/report.md` 并填实。
 
 ---
 

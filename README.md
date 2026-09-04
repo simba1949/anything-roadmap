@@ -79,35 +79,31 @@ validation.md         来源、覆盖和结构质检
 
 ## 数据与隐私
 
-公共地图和个人路线是两份正本，在一个界面中呈现：
+一次学习项目只使用一个顶层目录，四个 skill 按子目录区分产物：
 
 ```text
-domain-map.json + learning-path.json → roadmap.html
+<project-slug>-learning/
+├─ anything-research/      调研卷宗与报告
+├─ anything-domain-map/    公共知识地图
+├─ anything-roadmap/       个人路线与课程包
+└─ anything-tutor/         私人学习状态
 ```
 
-私人学习状态保存在独立工作区：
-
-```text
-learner-state.json
-evidence.jsonl
-progress.md
-```
-
-默认只保留结构化证据摘要，不保存完整对话。
+公共地图和个人路线仍是两份正本，由 `anything-roadmap/roadmap.html` 合成展示。`anything-tutor/` 与其他产物位于同一项目树，但保持独立隐私边界：顶层目录默认按私人数据处理，公开导出时不要包含该子目录。默认只保留结构化证据摘要，不保存完整对话。
 
 ## 确定性工具
 
 每层包含可重复执行的验证或渲染脚本：
 
 ```bash
-python skills/anything-domain-map/scripts/validate_domain_map.py domain-map.json
-python skills/anything-domain-map/scripts/render_domain_map.py domain-map.json domain-map.html
+python skills/anything-domain-map/scripts/validate_domain_map.py <项目根目录>/anything-domain-map/domain-map.json
+python skills/anything-domain-map/scripts/render_domain_map.py <项目根目录>/anything-domain-map/domain-map.json <项目根目录>/anything-domain-map/domain-map.html
 
-python skills/anything-roadmap/scripts/validate_learning_path.py learning-path.json domain-map.json
-python skills/anything-roadmap/scripts/render_roadmap.py domain-map.json learning-path.json roadmap.html
+python skills/anything-roadmap/scripts/validate_learning_path.py <项目根目录>/anything-roadmap/learning-path.json <项目根目录>/anything-domain-map/domain-map.json
+python skills/anything-roadmap/scripts/render_roadmap.py <项目根目录>/anything-domain-map/domain-map.json <项目根目录>/anything-roadmap/learning-path.json <项目根目录>/anything-roadmap/roadmap.html
 
-python skills/anything-tutor/scripts/state_tool.py init learning-path.json learner-workspace
-python skills/anything-tutor/scripts/state_tool.py validate learner-workspace
+python skills/anything-tutor/scripts/state_tool.py init <项目根目录>/anything-roadmap/learning-path.json <项目根目录>/anything-tutor
+python skills/anything-tutor/scripts/state_tool.py validate <项目根目录>/anything-tutor
 ```
 
 完整设计理由、文件契约、验收和迁移记录见 [CONSENSUS.md](./CONSENSUS.md)。

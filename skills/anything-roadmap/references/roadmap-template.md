@@ -57,6 +57,5 @@
 
 ## 如何开始
 
-可以阅读 `self-study.md` 独立学习，或用 `/anything-tutor 开始 <本目录>` 启动持续教学。
+可以阅读 `self-study.md` 独立学习，或用 `/anything-tutor 开始 <项目根目录>` 启动持续教学；状态将写入同一项目根目录下的 `anything-tutor/`。
 ```
-

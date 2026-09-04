@@ -49,7 +49,7 @@
   "sources": [],
   "research_ref": {
     "research_id": "research-distributed-systems-20260903",
-    "path": "../distributed-systems-research-20260903/research.md"
+    "path": "../anything-research/research.md"
   }
 }
 ```

@@ -6,7 +6,7 @@
   "domain_map_ref": {
     "domain_map_id": "dm-test-domain",
     "version": "1.0.0",
-    "path": "domain-map.json"
+    "path": "../anything-domain-map/domain-map.json"
   },
   "learner": {
     "learner_id": "learner-test",
@@ -79,4 +79,3 @@
   ],
   "sources": []
 }
-

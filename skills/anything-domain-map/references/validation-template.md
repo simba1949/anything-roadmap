@@ -11,6 +11,13 @@
 - 阻断问题：
 - 重要警告：
 
+## 项目目录
+
+- 项目根目录：`<project-slug>-learning/`
+- [ ] 本层四个产物只位于 `anything-domain-map/`
+- [ ] `research_ref.path` 指向 `../anything-research/research.md`
+- [ ] 未创建独立的同级 domain-map 产物目录
+
 ## 证据与来源
 
 - 检索截止（as_of）：

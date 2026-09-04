@@ -16,33 +16,33 @@ description: 基于 anything-roadmap 课程包开展持续、可恢复的系统�
 5. 反馈针对学习者实际思路，不用粘贴预制讲义代替诊断。
 6. AI 判定不可靠时降低置信度、澄清题目或暂停评分。
 7. 疑似课程错误时暂停相关判定，先核验并生成补丁；课程错误不能记成学习者错误。
-8. 只保存结构化证据摘要，不保存完整对话；私人状态不得写进共享课程目录。
+8. 只保存结构化证据摘要，不保存完整对话；私人状态只写入项目根目录的 `anything-tutor/`，不得写进 `anything-roadmap/`。
 
 ## 调用
 
 ```text
-/anything-tutor 开始 <roadmap目录或learning-path.json>
-/anything-tutor 继续 <learner-workspace>
-/anything-tutor 复习 <learner-workspace>
-/anything-tutor 状态 <learner-workspace>
+/anything-tutor 开始 <项目根目录或learning-path.json>
+/anything-tutor 继续 <项目根目录>
+/anything-tutor 复习 <项目根目录>
+/anything-tutor 状态 <项目根目录>
 ```
 
-如果用户只提供领域或目标且没有课程包，检测并调用上游 `anything-roadmap`；roadmap 缺公共地图时由其调用 `anything-domain-map`。不要在 tutor 内临场重做整条管线。
+如果用户只提供领域或目标且没有课程包，检测并调用上游 `anything-roadmap`；roadmap 缺公共地图时由其调用 `anything-domain-map`。不要在 tutor 内临场重做整条管线。所有上游和 tutor 产物必须落在同一个 `<project-slug>-learning/` 根目录的对应 skill 子目录中。
 
 ## 初始化
 
 读取：
 
-- `learning-contract.md`；
-- `learning-path.json`；
-- 路线引用的 `domain-map.json`；
-- 当前能力对应的 `content/<capability-id>.md`；
-- 已有 learner workspace（若有）。
+- `anything-roadmap/learning-contract.md`；
+- `anything-roadmap/learning-path.json`；
+- `anything-domain-map/domain-map.json`；
+- `anything-roadmap/content/<capability-id>.md`；
+- `anything-tutor/` 中已有状态（若有）。
 
 没有私人工作区时运行：
 
 ```bash
-python scripts/state_tool.py init path/to/learning-path.json path/to/learner-workspace
+python scripts/state_tool.py init <项目根目录>/anything-roadmap/learning-path.json <项目根目录>/anything-tutor
 ```
 
 状态契约见 [references/learner-state-schema.md](references/learner-state-schema.md)。初始化只使用 roadmap 中真实存在的入口诊断证据，其余能力均为 `unassessed`。
@@ -98,14 +98,16 @@ unassessed → recognition → recall → near_transfer → far_transfer → ret
 每次产生有效评价后，创建一个符合 schema 的事件 JSON 临时文件，然后运行：
 
 ```bash
-python scripts/state_tool.py record <learner-workspace> <event.json>
-python scripts/state_tool.py validate <learner-workspace>
-python scripts/state_tool.py render <learner-workspace>
+python scripts/state_tool.py record <项目根目录>/anything-tutor <event.json>
+python scripts/state_tool.py validate <项目根目录>/anything-tutor
+python scripts/state_tool.py render <项目根目录>/anything-tutor
 ```
 
 事件只记录任务摘要、结果、提示、错误类型、证据等级、置信度、下一复习时间和可选作品路径，不复制用户完整回答。
 
 会话结束时向学习者展示：本次新增证据、仍未闭合的错误、地图中的当前位置、到期复习和 2-3 个下一选择。
+
+结束前确认 `learner-state.json`、`evidence.jsonl` 和 `progress.md` 都位于 `<项目根目录>/anything-tutor/`；不得另建 `learner-workspace/` 同级目录。公开导出 research、domain-map 或 roadmap 时默认排除整个 `anything-tutor/`。
 
 ## 课程修正
 
@@ -115,4 +117,3 @@ python scripts/state_tool.py render <learner-workspace>
 - 事实争议或来源问题：交回 research 核验。
 
 补丁审核前不得直接覆写共享正本或让相关学习证据失效。
-

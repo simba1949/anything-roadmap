@@ -11,6 +11,14 @@
 - 阻断问题：
 - 重要警告：
 
+## 项目目录
+
+- 项目根目录：`<project-slug>-learning/`
+- [ ] 路线和课程产物只位于 `anything-roadmap/`
+- [ ] `domain_map_ref.path` 指向 `../anything-domain-map/domain-map.json`
+- [ ] tutor 私人状态只位于 `anything-tutor/`
+- [ ] 未创建独立的同级 roadmap 产物目录
+
 ## 学习契约
 
 - [ ] 记录领域信息检索截止日（as_of）和目标版本/现行规范

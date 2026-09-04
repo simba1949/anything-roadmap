@@ -102,17 +102,21 @@ description: 基于公共 domain-map、学习目标、基础与约束，为具�
 
 ## 6. 产物
 
-输出目录：`./<goal>-roadmap-<version>/`
+复用 domain-map 所在的学习项目根目录；若单独调用，由上游先创建 `./<project-slug>-learning/`。本 skill 只写：
 
 ```text
-learning-contract.md
-learning-path.json
-content/
-self-study.md
-roadmap.md
-roadmap.html
-validation.md
+<project-slug>-learning/
+└─ anything-roadmap/
+   ├─ learning-contract.md
+   ├─ learning-path.json
+   ├─ content/
+   ├─ self-study.md
+   ├─ roadmap.md
+   ├─ roadmap.html
+   └─ validation.md
 ```
+
+不要再创建独立的 `<goal>-roadmap-<version>/` 同级目录。版本保存在 `learning-path.json` 内；`domain_map_ref.path` 使用 `../anything-domain-map/domain-map.json`。
 
 - `content/` 是模块化教学内容正本；
 - `self-study.md` 是按 [references/self-study-template.md](references/self-study-template.md) 生成、可脱离 tutor 的合订版；
@@ -123,13 +127,13 @@ validation.md
 用公共地图和个人路径渲染单文件 HTML：
 
 ```bash
-python scripts/render_roadmap.py path/to/domain-map.json <输出目录>/learning-path.json <输出目录>/roadmap.html
+python scripts/render_roadmap.py <项目根目录>/anything-domain-map/domain-map.json <项目根目录>/anything-roadmap/learning-path.json <项目根目录>/anything-roadmap/roadmap.html
 ```
 
 ## 7. 验证
 
 ```bash
-python scripts/validate_learning_path.py <输出目录>/learning-path.json path/to/domain-map.json
+python scripts/validate_learning_path.py <项目根目录>/anything-roadmap/learning-path.json <项目根目录>/anything-domain-map/domain-map.json
 ```
 
 修复所有 error；解释或修复 warning。再执行独立评价轮，用初学、部分掌握和高水平三种模拟学习者攻击题目歧义、泄题、条件不足、错误答案、量规失真和伪迁移，把结果写入 `validation.md`。
@@ -148,6 +152,6 @@ python scripts/validate_learning_path.py <输出目录>/learning-path.json path/
 - 最新知识点候选逐项有证据和处置结果；所有会改变用户行为、心智模型、依赖、边界或毕业任务的已验证变化都已入图，门禁在学习契约之前通过。
 - 面向学习者的过程说明只呈现 research、domain-map、roadmap、tutor 四层职责，不泄露底层搜索或联网工具路由。
 
-若 `anything-tutor` 可用，用其状态工具在独立学习者工作区初始化状态；不要把私人状态写进可共享课程目录。
+若 `anything-tutor` 可用，在同一项目根目录的 `anything-tutor/` 初始化私人状态；不要写入 `anything-roadmap/`。项目根目录因此默认按私人数据处理，公开导出时只选明确允许共享的子目录。
 
 交付时列出所有产物和引用的 domain-map 绝对路径。

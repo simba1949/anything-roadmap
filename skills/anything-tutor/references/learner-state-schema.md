@@ -1,11 +1,13 @@
 # 学习者状态契约
 
-私人工作区包含：
+私人状态位于共享学习项目根目录的 `anything-tutor/` 子目录。它与其他三层同属一个项目树，但权限和导出边界独立：
 
 ```text
-learner-state.json
-evidence.jsonl
-progress.md
+<project-slug>-learning/
+└─ anything-tutor/
+   ├─ learner-state.json
+   ├─ evidence.jsonl
+   └─ progress.md
 ```
 
 ## learner-state.json

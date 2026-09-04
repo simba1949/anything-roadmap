@@ -98,7 +98,16 @@ description: 对任意研究问题做多轮深度调研，要求迭代搜索、�
 
 先按 [references/dossier-template.md](references/dossier-template.md) 完成 `research.md`，再在自由模式按 [references/report-template.md](references/report-template.md) 提炼 `report.md`。报告中的主要论断必须回指卷宗证据 ID。
 
-输出目录：`./<topic>-research-<YYYYMMDD>/`
+所有产物进入同一个学习项目根目录。若用户给出项目目录则复用；否则创建 `./<project-slug>-learning/`。本 skill 只写：
+
+```text
+<project-slug>-learning/
+└─ anything-research/
+   ├─ research.md
+   └─ report.md        # 仅在自由模式或用户要求时生成
+```
+
+不要再创建独立的 `<topic>-research-<YYYYMMDD>/` 同级目录。研究日期和 `research_id` 写在文件内容中；存在同一项目时更新该项目的 `anything-research/`，不得把下游产物搬出共享项目根目录。
 
 交付前检查：
 

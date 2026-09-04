@@ -70,21 +70,32 @@ description: 为任意领域生成面向所有人的全链路知识地图，覆�
 运行：
 
 ```bash
-python scripts/validate_domain_map.py <输出目录>/domain-map.json
+python scripts/validate_domain_map.py <项目根目录>/anything-domain-map/domain-map.json
 ```
 
 修复所有 error 后再渲染。warning 必须在 `validation.md` 解释或修复。
 
 ### 5. 生成四个产物
 
-输出目录：`./<domain>-domain-map-<version>/`
+复用 research 所在的学习项目根目录；若单独调用且不存在项目根目录，则创建 `./<project-slug>-learning/`。本 skill 只写：
+
+```text
+<project-slug>-learning/
+└─ anything-domain-map/
+   ├─ domain-map.json
+   ├─ domain-map.md
+   ├─ domain-map.html
+   └─ validation.md
+```
+
+不要再创建独立的 `<domain>-domain-map-<version>/` 同级目录。版本保存在 `domain-map.json` 内；`research_ref.path` 使用 `../anything-research/research.md`。
 
 - `domain-map.json`：机器正本。
 - `domain-map.md`：按 [references/domain-map-template.md](references/domain-map-template.md) 生成的人类可审阅全链路大纲。
 - `domain-map.html`：复制 `references/template.html`，用脚本嵌入 JSON：
 
 ```bash
-python scripts/render_domain_map.py <输出目录>/domain-map.json <输出目录>/domain-map.html
+python scripts/render_domain_map.py <项目根目录>/anything-domain-map/domain-map.json <项目根目录>/anything-domain-map/domain-map.html
 ```
 
 - `validation.md`：按 [references/validation-template.md](references/validation-template.md) 记录事实、来源、结构、覆盖、渲染检查和缺口。

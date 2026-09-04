@@ -13,7 +13,7 @@
   "domain_map_ref": {
     "domain_map_id": "dm-distributed-systems",
     "version": "1.0.0",
-    "path": "../distributed-systems-domain-map-1.0.0/domain-map.json"
+    "path": "../anything-domain-map/domain-map.json"
   },
   "learner": {
     "learner_id": "learner-local",
@@ -111,4 +111,3 @@ roadmap 阶段只允许记录真实发生的诊断结果：
 ```
 
 没有诊断证据时不填 `initial_evidence`，由 tutor 初始化为 `unassessed`。
-

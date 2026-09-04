@@ -80,21 +80,17 @@ Feedback distinguishes knowledge gaps, misconceptions, procedural failures, omit
 
 ## Data and privacy
 
-The public map and personal path remain separate sources of truth while appearing in one interface:
+One learning project uses one top-level directory. Each skill owns a clearly named subdirectory:
 
 ```text
-domain-map.json + learning-path.json → roadmap.html
+<project-slug>-learning/
+├─ anything-research/      research dossier and report
+├─ anything-domain-map/    public knowledge map
+├─ anything-roadmap/       personal path and course package
+└─ anything-tutor/         private learner state
 ```
 
-Private learning state lives in a separate workspace:
-
-```text
-learner-state.json
-evidence.jsonl
-progress.md
-```
-
-Only structured evidence summaries are retained by default, not complete conversations.
+The public map and personal path remain separate sources of truth and are combined in `anything-roadmap/roadmap.html`. `anything-tutor/` shares the project tree but remains a separate privacy boundary. Treat the project root as private by default and exclude the tutor directory from public exports. Only structured evidence summaries are retained, not complete conversations.
 
 ## Deterministic tooling
 

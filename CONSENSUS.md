@@ -45,6 +45,18 @@ anything-tutor
 
 四层契约相连，但每层均可单独调用。下游缺少上游产物时，应检测并调用相应上游能力；无法调用时允许显式降级，不得静默用模型记忆伪造等价产物。
 
+四层共享一个学习项目根目录，并以 skill 名称作为稳定边界：
+
+```text
+<project-slug>-learning/
+├─ anything-research/
+├─ anything-domain-map/
+├─ anything-roadmap/
+└─ anything-tutor/
+```
+
+禁止四层各自在工作区创建互不关联的同级产物目录。版本、日期和稳定 ID 写入各自正本；跨层引用优先使用上述固定相对路径。
+
 建议调用形式：
 
 ```text
@@ -125,11 +137,12 @@ research 只负责证据，不直接生成公共地图或个人路线。
 ### 5.3 产物
 
 ```text
-<domain>-domain-map-<version>/
-├─ domain-map.json
-├─ domain-map.md
-├─ domain-map.html
-└─ validation.md
+<project-slug>-learning/
+└─ anything-domain-map/
+   ├─ domain-map.json
+   ├─ domain-map.md
+   ├─ domain-map.html
+   └─ validation.md
 ```
 
 | 文件 | 面向对象 | 职责 |
@@ -208,14 +221,15 @@ roadmap 不把公共知识点简单改写成动词，而是反向分解：
 ### 6.5 产物
 
 ```text
-<goal>-roadmap-<version>/
-├─ learning-contract.md
-├─ learning-path.json
-├─ content/
-├─ self-study.md
-├─ roadmap.md
-├─ roadmap.html
-└─ validation.md
+<project-slug>-learning/
+└─ anything-roadmap/
+   ├─ learning-contract.md
+   ├─ learning-path.json
+   ├─ content/
+   ├─ self-study.md
+   ├─ roadmap.md
+   ├─ roadmap.html
+   └─ validation.md
 ```
 
 | 产物 | 职责 |
@@ -322,14 +336,17 @@ tutor 可在讲解者、示范者、追问者和教练之间切换，不把单�
 
 ## 8. 学习者状态
 
-私人状态存入独立、可迁移、可整体删除的本地学习者工作区：
+私人状态存入学习项目根目录内独立、可迁移、可整体删除的 `anything-tutor/` 子目录：
 
 ```text
-<learner-workspace>/
-├─ learner-state.json
-├─ evidence.jsonl
-└─ progress.md
+<project-slug>-learning/
+└─ anything-tutor/
+   ├─ learner-state.json
+   ├─ evidence.jsonl
+   └─ progress.md
 ```
+
+同属一个项目树不等于同一公开边界：项目根目录默认按私人数据处理；公开教材或地图只导出明确选择的 research、domain-map、roadmap 内容，不得包含 `anything-tutor/`。
 
 - `learner-state.json`：当前机器状态正本；
 - `evidence.jsonl`：精简证据事件，不保存完整对话；
