@@ -17,60 +17,22 @@
 ## 安装
 
 ```bash
-npx skills add simba1949/anything-roadmap
-```
-
-仓库包含四个 skill；上面的命令会发现它们并进入选择流程。安装全部四个 skill 到 Codex：
-
-```bash
 npx skills add simba1949/anything-roadmap --global --all --agent codex
 ```
 
-只安装个人路线 skill 到 Codex：
+更新本仓库的四个 skill（不会更新其他 skill）：
 
 ```bash
-npx skills add simba1949/anything-roadmap --skill anything-roadmap --global --yes --agent codex
+npx skills update anything-research anything-domain-map anything-roadmap anything-tutor --global --yes
 ```
 
-安装本地检出的仓库（用于开发或验证）：
-
-```bash
-npx skills add . --skill anything-roadmap --global --copy --yes --agent codex
-```
-
-`--global` 写入用户级 skill 目录；省略它则安装到当前项目。手动安装时，将 `skills/` 下需要的目录复制到 agent 的 skill 目录。
-
-卸载已安装到 Codex 的单个 skill：
-
-```bash
-npx skills remove anything-roadmap --global --yes --agent codex
-```
-
-卸载通过本仓库安装的全部四个 skill（显式列出名称，避免误删其他仓库的 skill）：
+卸载本仓库的四个 skill：
 
 ```bash
 npx skills remove anything-research anything-domain-map anything-roadmap anything-tutor --global --yes --agent codex
 ```
 
-不要把 `--skill '*'` 当作按仓库卸载；它会匹配当前范围内的所有 skill。只有确认要清空 Codex 的全部全局 skill 时，才使用：
-
-```bash
-npx skills remove --skill '*' --global --yes --agent codex
-```
-
-更新从 GitHub 安装的 skill：
-
-```bash
-npx skills update anything-roadmap --global --yes
-```
-
-更新全部全局 skill：
-
-```bash
-npx skills update --global --yes
-```
-
-如果 skill 是从本地检出目录复制安装的，先卸载旧版本，再重新执行上面的本地安装命令。
+以上命令只针对本仓库的四个 skill，不使用通配符，也不会影响其他 skill。
 
 ## 四层分别解决什么
 
