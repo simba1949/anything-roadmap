@@ -3,7 +3,7 @@
 ```markdown
 # <领域>知识地图
 
-> 地图 ID：<domain_map_id> | 版本：<version> | 日期：<generated_at> | 非个性化公共地图
+> 地图 ID：<domain_map_id> | 版本：<version> | 日期：<generated_at> | 信息截止：<freshness.as_of> | 非个性化公共地图
 
 ## 如何使用这张地图
 
@@ -21,6 +21,17 @@
 
 | 模块 | 解决的问题 | 阶段 | 与其他模块的关系 |
 |---|---|---|---|
+
+## 当前基线与最新变化
+
+- 变化速度：<freshness.volatility>
+- 最新信息窗口：<freshness.window_from> 至 <freshness.as_of>；<freshness.window_reason>
+- 当前稳定版本/现行规范：<freshness.current_baseline>
+
+| 变化 | 状态 | 发布/生效 | 适用范围 | 地图动作 | 受影响节点 |
+|---|---|---|---|---|---|
+
+明确区分稳定、新增、实验性、已废弃、已移除和计划中。此处是当前状态覆盖层，不替代下方稳定知识结构。
 
 ## 典型遍历
 
@@ -58,4 +69,3 @@
 ```
 
 生成时保留知识层级，不把能力、个人目标、学习时长或进度混入公共地图。
-

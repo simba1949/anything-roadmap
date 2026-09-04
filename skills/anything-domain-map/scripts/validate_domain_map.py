@@ -11,7 +11,11 @@ from pathlib import Path
 ALLOWED_TYPES = ("module", "topic", "chapter", "knowledge_point")
 TYPE_RANK = {name: rank for rank, name in enumerate(ALLOWED_TYPES)}
 ALLOWED_RELATIONS = {"prerequisite", "supports", "contrasts", "interfaces", "applies_to"}
+ALLOWED_VOLATILITY = {"slow", "moderate", "fast"}
+ALLOWED_CHANGE_STATUS = {"stable", "new", "experimental", "deprecated", "removed", "planned"}
+ALLOWED_MAP_ACTION = {"add", "modify", "downgrade", "remove", "none"}
 SEMVER = re.compile(r"^\d+\.\d+\.\d+$")
+ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
 def validate(path: Path) -> tuple[list[str], list[str]]:
@@ -19,7 +23,7 @@ def validate(path: Path) -> tuple[list[str], list[str]]:
     errors: list[str] = []
     warnings: list[str] = []
     required = {
-        "schema_version", "domain_map_id", "version", "generated_at", "domain",
+        "schema_version", "domain_map_id", "version", "generated_at", "domain", "freshness",
         "modules", "relationships", "typical_traversal", "sources"
     }
     missing = sorted(required - data.keys())
@@ -100,6 +104,52 @@ def validate(path: Path) -> tuple[list[str], list[str]]:
         for node_id in source.get("supports", []):
             if node_id not in nodes:
                 errors.append(f"source {source.get('id')}: unknown supported node {node_id}")
+
+    freshness = data.get("freshness")
+    if not isinstance(freshness, dict):
+        errors.append("freshness must be an object")
+    else:
+        for field in ("as_of", "volatility", "window_from", "window_reason", "current_baseline", "recent_changes"):
+            if field not in freshness:
+                errors.append(f"freshness: missing {field}")
+        for field in ("as_of", "window_from"):
+            if not ISO_DATE.match(str(freshness.get(field, ""))):
+                errors.append(f"freshness.{field} must be YYYY-MM-DD")
+        if freshness.get("volatility") not in ALLOWED_VOLATILITY:
+            errors.append("freshness.volatility must be slow, moderate, or fast")
+        baseline = freshness.get("current_baseline")
+        if not isinstance(baseline, dict) or not baseline.get("label"):
+            errors.append("freshness.current_baseline needs label")
+        else:
+            for source_id in baseline.get("source_ids", []):
+                if source_id not in source_ids:
+                    errors.append(f"freshness.current_baseline: unknown source id {source_id}")
+        changes = freshness.get("recent_changes")
+        if not isinstance(changes, list):
+            errors.append("freshness.recent_changes must be an array")
+        else:
+            change_ids: set[str] = set()
+            for index, change in enumerate(changes):
+                if not isinstance(change, dict):
+                    errors.append(f"freshness.recent_changes[{index}] must be an object")
+                    continue
+                change_id = change.get("id")
+                if not change_id:
+                    errors.append(f"freshness.recent_changes[{index}] missing id")
+                elif change_id in change_ids:
+                    errors.append(f"duplicate change id: {change_id}")
+                else:
+                    change_ids.add(change_id)
+                if change.get("status") not in ALLOWED_CHANGE_STATUS:
+                    errors.append(f"change {change_id or index}: invalid status {change.get('status')!r}")
+                if change.get("map_action") not in ALLOWED_MAP_ACTION:
+                    errors.append(f"change {change_id or index}: invalid map_action {change.get('map_action')!r}")
+                for node_id in change.get("affected_node_ids", []):
+                    if node_id not in nodes:
+                        errors.append(f"change {change_id or index}: unknown affected node {node_id}")
+                for source_id in change.get("source_ids", []):
+                    if source_id not in source_ids:
+                        errors.append(f"change {change_id or index}: unknown source id {source_id}")
 
     for node_id, node in nodes.items():
         for source_id in node.get("source_ids", []):

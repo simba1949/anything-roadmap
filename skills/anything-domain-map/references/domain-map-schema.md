@@ -6,7 +6,7 @@
 
 ```json
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "domain_map_id": "dm-distributed-systems",
   "version": "1.0.0",
   "generated_at": "2026-09-03",
@@ -20,6 +20,29 @@
       "interfaces": ["数据库", "网络", "操作系统"]
     }
   },
+  "freshness": {
+    "as_of": "2026-09-04",
+    "volatility": "fast",
+    "window_from": "2025-09-04",
+    "window_reason": "快速变化的软件领域，回溯最近 12 个月并追到最新稳定发布。",
+    "current_baseline": {
+      "label": "当前稳定版本 2.4",
+      "source_ids": ["src-release-24"]
+    },
+    "recent_changes": [
+      {
+        "id": "chg-bot-stable",
+        "title": "Bot 入口进入稳定版",
+        "status": "new",
+        "published_at": "2026-08-20",
+        "effective_at": "2026-08-20",
+        "applies_to": "2.4+",
+        "map_action": "add",
+        "affected_node_ids": ["kp-bot"],
+        "source_ids": ["src-release-24"]
+      }
+    ]
+  },
   "modules": [],
   "relationships": [],
   "typical_traversal": [],
@@ -31,7 +54,19 @@
 }
 ```
 
-必填：`schema_version`、`domain_map_id`、`version`、`generated_at`、`domain`、`modules`、`relationships`、`typical_traversal`、`sources`。ID 使用稳定、小写 ASCII slug；版本使用语义版本。
+必填：`schema_version`、`domain_map_id`、`version`、`generated_at`、`domain`、`freshness`、`modules`、`relationships`、`typical_traversal`、`sources`。ID 使用稳定、小写 ASCII slug；版本使用语义版本。
+
+## 时效与最新变化
+
+`freshness` 是最新状态研究轨的机器正本：
+
+- `as_of`：本地图核验到的截止日，格式 `YYYY-MM-DD`；
+- `volatility`：`slow`、`moderate` 或 `fast`；
+- `window_from` 与 `window_reason`：最新信息回溯窗口及选择理由；
+- `current_baseline`：当前稳定版本、现行规范或权威状态；`source_ids` 必须存在；
+- `recent_changes`：窗口内会影响领域结构或学习路线的变化；没有实质变化时使用空数组，不得省略。
+
+`recent_changes[].status` 只能是 `stable`、`new`、`experimental`、`deprecated`、`removed`、`planned`；`map_action` 只能是 `add`、`modify`、`downgrade`、`remove`、`none`。`affected_node_ids` 与 `source_ids` 必须引用正本中存在的 ID。`planned` 或未经证实的事项不得对应一个被描述为当前可用的正式知识点。
 
 ## 递归节点
 
@@ -133,4 +168,4 @@
 - PATCH：文案、来源替换，不改变节点语义与依赖。
 - MINOR：新增节点或关系，旧 ID 仍有效。
 - MAJOR：节点语义、边界或依赖发生破坏性变化。
-
+- `as_of` 推进但没有节点语义变化时至少递增 PATCH；新增当前功能节点时递增 MINOR。

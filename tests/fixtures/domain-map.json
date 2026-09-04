@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "domain_map_id": "dm-test-domain",
   "version": "1.0.0",
   "generated_at": "2026-09-03",
@@ -12,6 +12,17 @@
       "excludes": ["真实领域内容"],
       "interfaces": ["课程设计"]
     }
+  },
+  "freshness": {
+    "as_of": "2026-09-03",
+    "volatility": "slow",
+    "window_from": "2025-09-03",
+    "window_reason": "测试夹具按年度检查稳定契约。",
+    "current_baseline": {
+      "label": "测试契约 1.1",
+      "source_ids": ["src-rfc"]
+    },
+    "recent_changes": []
   },
   "modules": [
     {
@@ -84,4 +95,3 @@
     }
   ]
 }
-
