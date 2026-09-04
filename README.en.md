@@ -40,6 +40,38 @@ npx skills add . --skill anything-roadmap --global --copy --yes --agent codex
 
 `--global` installs to the user-level skill directory; omit it for a project-local installation. For manual installation, copy the required directories under `skills/` into your agent's skill directory.
 
+To remove the single skill installed into Codex:
+
+```bash
+npx skills remove anything-roadmap --global --yes --agent codex
+```
+
+To remove all four skills installed from this repository (list the names explicitly so skills from other repositories are preserved):
+
+```bash
+npx skills remove anything-research anything-domain-map anything-roadmap anything-tutor --global --yes --agent codex
+```
+
+Do not treat `--skill '*'` as a repository filter; it matches every skill in the selected scope. Use it only when you intentionally want to remove all global skills from Codex:
+
+```bash
+npx skills remove --skill '*' --global --yes --agent codex
+```
+
+To update a skill installed from GitHub:
+
+```bash
+npx skills update anything-roadmap --global --yes
+```
+
+To update all global skills:
+
+```bash
+npx skills update --global --yes
+```
+
+If the skill was copied from a local checkout, remove the old version first and rerun the local installation command above.
+
 ## The four layers
 
 ### anything-research
