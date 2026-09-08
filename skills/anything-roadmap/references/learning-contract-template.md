@@ -5,6 +5,7 @@
 ```markdown
 # <目标>学习契约
 
+> 生成器：[anything-roadmap](https://github.com/simba1949/anything-roadmap) · skill：anything-roadmap
 > roadmap_id：<id> | domain-map：<id>@<version> | 状态：待确认/已确认 | 确认日期：<date>
 
 ## 目标情境

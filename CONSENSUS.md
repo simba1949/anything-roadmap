@@ -29,6 +29,8 @@
 
 ## 2. 四层架构
 
+四层生成物统一携带项目标识 `anything-roadmap` 和仓库地址 `https://github.com/simba1949/anything-roadmap`，同时注明生成 skill。Markdown 在标题后署名，HTML 包含 generator meta 与可点击页脚，JSON 使用顶层 `generator`；JSONL 首行为生成器元数据，后续证据事件亦保留 `generator`。署名表示生成工具来源，不代替知识证据来源。
+
 ```text
 anything-research
 证据、来源、争议、边界

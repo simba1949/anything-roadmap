@@ -3,6 +3,7 @@
 ```markdown
 # <领域>知识地图
 
+> 生成器：[anything-roadmap](https://github.com/simba1949/anything-roadmap) · skill：anything-domain-map
 > 地图 ID：<domain_map_id> | 版本：<version> | 日期：<generated_at> | 信息截止：<freshness.as_of> | 非个性化公共地图
 
 ## 如何使用这张地图

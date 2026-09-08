@@ -28,6 +28,9 @@ def validate(path: Path, domain_path: Path | None) -> tuple[list[str], list[str]
     data = json.loads(path.read_text(encoding="utf-8"))
     errors: list[str] = []
     warnings: list[str] = []
+    expected_generator = {"name":"anything-roadmap","skill":"anything-roadmap","repository":"https://github.com/simba1949/anything-roadmap"}
+    if data.get("generator") != expected_generator:
+        errors.append("generator must contain the canonical project name, skill and repository")
     required = {"schema_version", "roadmap_id", "version", "generated_at", "domain_map_ref", "learner", "learning_contract", "capabilities", "recommended_sequence", "projects", "sources"}
     missing = sorted(required - data.keys())
     if missing:

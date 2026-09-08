@@ -18,6 +18,10 @@ RESULTS = {"pass", "partial", "fail", "ungradable"}
 ERRORS = {None, "knowledge_gap", "misconception", "procedure_failure", "condition_omission", "transfer_failure", "ambiguous_task", "unreliable_grading"}
 
 
+GENERATOR = {"name":"anything-roadmap","skill":"anything-tutor","repository":"https://github.com/simba1949/anything-roadmap"}
+METADATA = {"record_type": "generator", **GENERATOR}
+
+
 def now() -> str:
     return datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
 
@@ -62,6 +66,7 @@ def init_workspace(learning_path: Path, workspace: Path) -> None:
         domain_ref["path"] = str(resolve_domain_path(learning_path, domain_ref))
     state = {
         "schema_version": "1.0",
+        "generator": dict(GENERATOR),
         "learner_id": route.get("learner", {}).get("learner_id", "learner-local"),
         "roadmap_ref": {"roadmap_id": route.get("roadmap_id"), "version": route.get("version"), "path": str(learning_path)},
         "domain_map_ref": domain_ref,
@@ -74,7 +79,7 @@ def init_workspace(learning_path: Path, workspace: Path) -> None:
         "last_session_summary": None,
     }
     atomic_json(state_path, state)
-    (workspace / "evidence.jsonl").write_text("", encoding="utf-8")
+    (workspace / "evidence.jsonl").write_text(json.dumps(METADATA) + "\n", encoding="utf-8")
     render_progress(workspace)
 
 
@@ -105,13 +110,17 @@ def record(workspace: Path, event_path: Path) -> None:
     state_path = workspace / "learner-state.json"
     state = load_json(state_path)
     event = load_json(event_path)
+    event["generator"] = dict(GENERATOR)
+    state["generator"] = dict(GENERATOR)
     errors = validate_event(event, set(state.get("capability_states", {})))
     existing_ids = set()
     evidence_path = workspace / "evidence.jsonl"
     if evidence_path.exists():
         for line in evidence_path.read_text(encoding="utf-8").splitlines():
             if line.strip():
-                existing_ids.add(json.loads(line).get("event_id"))
+                entry = json.loads(line)
+                if entry.get("record_type") != "generator":
+                    existing_ids.add(entry.get("event_id"))
     if event.get("event_id") in existing_ids:
         errors.append(f"duplicate event_id: {event.get('event_id')}")
     if errors:
@@ -141,6 +150,8 @@ def record(workspace: Path, event_path: Path) -> None:
 def validate_workspace(workspace: Path) -> list[str]:
     errors = []
     state = load_json(workspace / "learner-state.json")
+    if state.get("generator") != GENERATOR:
+        errors.append("state generator metadata is missing or invalid")
     caps = state.get("capability_states", {})
     if state.get("session", {}).get("phase") not in PHASES:
         errors.append("invalid session phase")
@@ -156,6 +167,7 @@ def validate_workspace(workspace: Path) -> list[str]:
             errors.append(f"{cap_id}: invalid hint level")
         refs.update(cap.get("evidence_refs", []))
     seen = set()
+    has_header = False
     evidence_path = workspace / "evidence.jsonl"
     if evidence_path.exists():
         for number, line in enumerate(evidence_path.read_text(encoding="utf-8").splitlines(), 1):
@@ -166,10 +178,19 @@ def validate_workspace(workspace: Path) -> list[str]:
             except json.JSONDecodeError:
                 errors.append(f"evidence line {number}: invalid JSON")
                 continue
+            if event.get("record_type") == "generator":
+                has_header = number == 1 and event == METADATA
+                if number != 1 or event != METADATA:
+                    errors.append(f"evidence line {number}: invalid generator header")
+                continue
+            if event.get("generator") != GENERATOR:
+                errors.append(f"evidence line {number}: invalid generator")
             errors.extend(f"evidence line {number}: {e}" for e in validate_event(event, set(caps)))
             if event.get("event_id") in seen:
                 errors.append(f"evidence line {number}: duplicate event_id")
             seen.add(event.get("event_id"))
+    if not has_header:
+        errors.append("evidence file needs a canonical generator header")
     missing = refs - seen
     if missing:
         errors.append(f"state references missing evidence: {', '.join(sorted(missing))}")
@@ -185,6 +206,8 @@ def render_progress(workspace: Path) -> None:
     current = caps_by_id.get(current_id, {})
     lines = [
         f"# {route.get('roadmap_id', '学习路线')} 学习进度",
+        "",
+        "> 生成器：[anything-roadmap](https://github.com/simba1949/anything-roadmap) · skill：anything-tutor",
         "",
         f"> 学习者：{state.get('learner_id')} | 更新时间：{state.get('updated_at')}",
         "",

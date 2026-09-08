@@ -3,6 +3,7 @@
 ```markdown
 # <目标>个人学习路线
 
+> 生成器：[anything-roadmap](https://github.com/simba1949/anything-roadmap) · skill：anything-roadmap
 > roadmap：<id>@<version> | domain-map：<id>@<version> | 学习者：<learner_id> | 日期：<date>
 
 ## 先看全局

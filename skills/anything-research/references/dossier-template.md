@@ -5,6 +5,7 @@
 ```markdown
 # <主题>调研卷宗
 
+> 生成器：[anything-roadmap](https://github.com/simba1949/anything-roadmap) · skill：anything-research
 > research_id：<稳定 ID> | 日期：<date> | 模式：自由/领域制图 | 用途：理解/决策 | 深度：<档位+轮数>
 > 检索截止：<as_of, YYYY-MM-DD> | 最新信息窗口：<起始日期或选择规则及理由>
 > 统计：候选 X / 全文阅读 Y / 入卷 Z / 剔除 W

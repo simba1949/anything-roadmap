@@ -1,5 +1,6 @@
 {
   "schema_version": "1.0",
+  "generator": {"name":"anything-roadmap","skill":"anything-roadmap","repository":"https://github.com/simba1949/anything-roadmap"},
   "roadmap_id": "rm-test-path",
   "version": "1.0.0",
   "generated_at": "2026-09-03",

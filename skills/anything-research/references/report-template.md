@@ -9,6 +9,7 @@
 ```markdown
 # <主题>：一句话定性
 
+> 生成器：[anything-roadmap](https://github.com/simba1949/anything-roadmap) · skill：anything-research
 > 日期 | 用途（理解/决策）| 深度（档位+轮数）| 证据底座：同目录 research.md
 
 ## 总览

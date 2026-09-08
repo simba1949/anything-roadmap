@@ -5,6 +5,7 @@
 ```markdown
 # <目标>自学课程
 
+> 生成器：[anything-roadmap](https://github.com/simba1949/anything-roadmap) · skill：anything-roadmap
 > 对应 roadmap：<id>@<version> | 公共地图：<id>@<version>
 
 ## 使用说明
@@ -40,4 +41,3 @@
 ```
 
 合并时不得生成与 `content/` 不一致的第二套讲解。更新教学内容后重新渲染本文件。
-

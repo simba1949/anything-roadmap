@@ -7,6 +7,7 @@
 ```json
 {
   "schema_version": "1.1",
+  "generator": {"name":"anything-roadmap","skill":"anything-domain-map","repository":"https://github.com/simba1949/anything-roadmap"},
   "domain_map_id": "dm-distributed-systems",
   "version": "1.0.0",
   "generated_at": "2026-09-03",
@@ -169,3 +170,5 @@
 - MINOR：新增节点或关系，旧 ID 仍有效。
 - MAJOR：节点语义、边界或依赖发生破坏性变化。
 - `as_of` 推进但没有节点语义变化时至少递增 PATCH；新增当前功能节点时递增 MINOR。
+
+生成物的 `generator` 必填，固定使用上述 name、skill 和 repository。Markdown 文件标题后显示对应生成器及仓库链接。

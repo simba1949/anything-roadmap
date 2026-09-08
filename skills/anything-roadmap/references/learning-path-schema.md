@@ -7,6 +7,7 @@
 ```json
 {
   "schema_version": "1.0",
+  "generator": {"name":"anything-roadmap","skill":"anything-roadmap","repository":"https://github.com/simba1949/anything-roadmap"},
   "roadmap_id": "rm-build-reliable-api",
   "version": "1.0.0",
   "generated_at": "2026-09-03",
@@ -111,3 +112,5 @@ roadmap 阶段只允许记录真实发生的诊断结果：
 ```
 
 没有诊断证据时不填 `initial_evidence`，由 tutor 初始化为 `unassessed`。
+
+生成物的 `generator` 必填，固定使用上述 name、skill 和 repository。Markdown 文件标题后显示对应生成器及仓库链接。

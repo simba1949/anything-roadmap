@@ -15,6 +15,7 @@
 ```json
 {
   "schema_version": "1.0",
+  "generator": {"name":"anything-roadmap","skill":"anything-tutor","repository":"https://github.com/simba1949/anything-roadmap"},
   "learner_id": "learner-local",
   "roadmap_ref": {
     "roadmap_id": "rm-build-reliable-api",
@@ -99,3 +100,7 @@
 - 下一步选择。
 
 它是只读视图，不是机器正本。
+
+生成物的 `generator` 必填，固定使用上述 name、skill 和 repository。Markdown 文件标题后显示对应生成器及仓库链接。
+
+`evidence.jsonl` 首行为 `record_type: generator` 的元数据对象，包含 name、skill、repository；其余行是证据事件。读写器须跳过该元数据行，每个事件亦携带同样的 `generator` 对象。元数据不是学习证据。

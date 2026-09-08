@@ -3,6 +3,7 @@
 ```markdown
 # <roadmap> 验证报告
 
+> 生成器：[anything-roadmap](https://github.com/simba1949/anything-roadmap) · skill：anything-roadmap
 > roadmap：<roadmap_id>@<version> | domain-map：<id>@<version> | 日期：<date>
 
 ## 结论
@@ -18,6 +19,7 @@
 - [ ] `domain_map_ref.path` 指向 `../anything-domain-map/domain-map.json`
 - [ ] tutor 私人状态只位于 `anything-tutor/`
 - [ ] 未创建独立的同级 roadmap 产物目录
+- [ ] JSON、全部 Markdown（含 content）与 HTML 均包含 anything-roadmap 标识、skill 名和正确仓库地址
 
 ## 学习契约
 

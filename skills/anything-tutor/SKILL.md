@@ -17,6 +17,7 @@ description: 基于 anything-roadmap 课程包开展持续、可恢复的系统�
 6. AI 判定不可靠时降低置信度、澄清题目或暂停评分。
 7. 疑似课程错误时暂停相关判定，先核验并生成补丁；课程错误不能记成学习者错误。
 8. 只保存结构化证据摘要，不保存完整对话；私人状态只写入项目根目录的 `anything-tutor/`，不得写进 `anything-roadmap/`。
+9. tutor 生成的 JSON、JSONL 和 Markdown 都必须携带 `anything-roadmap`、`anything-tutor` 和 `https://github.com/simba1949/anything-roadmap`。`evidence.jsonl` 的首行是生成器元数据记录，后续证据事件也带 `generator`。
 
 ## 调用
 

@@ -3,6 +3,7 @@
 ```markdown
 # <领域>知识地图验证报告
 
+> 生成器：[anything-roadmap](https://github.com/simba1949/anything-roadmap) · skill：anything-domain-map
 > 地图：<domain_map_id>@<version> | 验证日期：<date>
 
 ## 结论
@@ -17,6 +18,7 @@
 - [ ] 本层四个产物只位于 `anything-domain-map/`
 - [ ] `research_ref.path` 指向 `../anything-research/research.md`
 - [ ] 未创建独立的同级 domain-map 产物目录
+- [ ] JSON、Markdown 与 HTML 均包含 anything-roadmap 标识、skill 名和正确仓库地址
 
 ## 证据与来源
 

@@ -5,6 +5,7 @@
 ```markdown
 # <能力名称>
 
+> 生成器：[anything-roadmap](https://github.com/simba1949/anything-roadmap) · skill：anything-roadmap
 > capability_id：<id> | 路径角色：core/support | 策略：<strategy> | 验证：<verification>
 
 ## 你最终能做什么
@@ -83,4 +84,3 @@
 ```
 
 不要用链接列表代替讲解，不要在题目上方泄露解题关键词，不要把完整示范后的跟做记为掌握。
-
